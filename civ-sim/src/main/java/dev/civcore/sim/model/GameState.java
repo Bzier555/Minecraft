@@ -22,6 +22,8 @@ public final class GameState {
     public Map<Integer, Civilization> civs = new LinkedHashMap<>();
     public Map<Long, City> cities = new LinkedHashMap<>();
     public Map<Long, Army> armies = new LinkedHashMap<>();
+    /** Fog of war: tiles each civ has ever seen (row-major), see dev.civcore.sim.view.Visibility. */
+    public Map<Integer, boolean[]> explored = new java.util.TreeMap<>();
     /** Pairs at war, as "lowId:highId". */
     public java.util.Set<String> wars = new java.util.TreeSet<>();
     /** Outstanding peace offers, as "fromId>toId". */

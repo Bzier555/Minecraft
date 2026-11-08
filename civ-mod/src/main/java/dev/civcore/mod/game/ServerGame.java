@@ -197,9 +197,39 @@ public final class ServerGame {
         syncWorld();
     }
 
-    /** Brings the physical world in line with the strategic state: pending City Centers, army markers. */
+    /** Tiles where each civ's online members stand (they extend that civ's vision). */
+    private java.util.Map<Integer, List<TilePos>> memberTiles() {
+        java.util.Map<Integer, List<TilePos>> out = new java.util.HashMap<>();
+        var m = state.settings.mapping();
+        for (var p : server.getPlayerList().getPlayers()) {
+            if (p.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) continue;
+            state.civOfMember(p.getStringUUID()).ifPresent(c -> {
+                TilePos t = state.topology().normalizeOrNull(m.tileX(p.getBlockX()), m.tileZ(p.getBlockZ()));
+                if (t != null) out.computeIfAbsent(c.id, k -> new java.util.ArrayList<>()).add(t);
+            });
+        }
+        return out;
+    }
+
+    /** The fog-of-war-filtered view for one player, as JSON. */
+    public Optional<String> viewFor(net.minecraft.server.level.ServerPlayer player) {
+        if (state == null) return Optional.empty();
+        int civ = state.civOfMember(player.getStringUUID()).map(c -> c.id).orElse(-1);
+        var tiles = memberTiles().getOrDefault(civ, List.of());
+        var view = dev.civcore.sim.view.ViewBuilder.build(state, RulesetReloadListener.current(), civ, tiles, state.finished(),
+            clock.millisUntilNext() / 1000, clock.paused());
+        return Optional.of(dev.civcore.sim.view.ViewBuilder.toJson(view));
+    }
+
+    public String defaultCityName(String playerId) {
+        return state == null ? "City" : state.civOfMember(playerId)
+            .map(c -> dev.civcore.sim.ai.AiController.nextCityName(state, c)).orElse("City " + (state.cities.size() + 1));
+    }
+
+    /** Brings the physical world in line with the strategic state: fog of war, pending City Centers, army markers. */
     public void syncWorld() {
         if (state == null) return;
+        dev.civcore.sim.view.Visibility.update(state, memberTiles());
         var level = server.overworld();
         dev.civcore.mod.army.ArmyMarkers.placePendingCityCenters(level, state);
         markers.sync(level, state);

@@ -30,6 +30,10 @@ public final class CivCoreMod {
 
     public CivCoreMod(IEventBus modBus) {
         ModContent.register(modBus);
+        modBus.addListener(dev.civcore.mod.net.CivNetwork::register);
+        if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+            dev.civcore.mod.client.ClientSetup.init(modBus);
+        }
         IEventBus game = NeoForge.EVENT_BUS;
         game.addListener(BuiltinTerritory::onBreak);
         game.addListener(BuiltinTerritory::onPlace);

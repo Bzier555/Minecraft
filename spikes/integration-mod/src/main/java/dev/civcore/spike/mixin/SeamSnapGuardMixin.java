@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * (e.g. Villager Recruits' AsyncPath, which keeps its real target in its own field) crash the server with an NPE.
  *
  * Fix: right before the shift, drop such a path. Exotic Worlds already null-checks the navigation's path, and the
- * mob simply re-plans next tick in the new coordinate frame. Remove once fixed upstream.
+ * mob simply re-plans next tick in the new coordinate frame. Superseded by civ-mod's copy.
  */
 @Pseudo
 @Mixin(targets = "com.exoticworlds.engine.seam.SeamSnap", remap = false)

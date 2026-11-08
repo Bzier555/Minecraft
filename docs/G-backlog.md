@@ -15,7 +15,6 @@
 | S0.5 ✅ | OPAC proxy claim spike | P1 | S0.2 | OPAC API | Test mod | M | S | `tryToClaim` with a nation proxy UUID claims chunks that block non-members; Xaero shows claims in nation colour |
 | S0.6 ✅ | World preset | P0 | S0.2 | Exotic Worlds presets, Tectonic, Terralith | — | L | S | Small: 8 min 41 s pregen, 205 MB (measured); Medium/Large extrapolated |
 | S0.8 | AI-city blueprint paste | P1 | S0.3 | Structurize placement API | Spike | M | S | A town hall pasted by code reaches L1 (the spike's `CreativeBuildingStructureHandler` attempt placed nothing) |
-| S0.9 | Report the Exotic Worlds null-check bug upstream | P2 | — | — | Issue text | L | S | Issue filed with repro (needs the owner's OK to post) |
 | S0.7 | Performance baseline | P0 | S0.3, S0.4 | spark | Scripts | M | S | spark reports for: 1 colony 50 citizens; 3 colonies; 200 recruits fighting; numbers recorded in docs |
 
 ## Phase 1 — MVP (see [H](H-mvp.md))
@@ -36,8 +35,8 @@
 | F1.11 ✅ | Abstract armies + combat (no physical) | P0 | F1.9 | — | Army movement on grid, abstract combat, siege, capture | M | L | Army moves at expected speed; capture transfers city and tiles; unit tests for combat math |
 | F1.12 ✅ | Deterministic AI controller v0 | P0 | F1.9–F1.11 | — | Utility AI: expand, build, research, attack weakest neighbour | H | L | Headless 2-AI game reaches a victory within 400 ticks in ≥ 80% of 100 seeded runs |
 | F1.13 ✅ | Victory: domination + score | P0 | F1.11 | — | Victory checks, end-of-game | L | S | Capturing all capitals ends game with announcement; time limit → score winner |
-| F1.14 | Commands + minimal UI | P0 | F1.7–F1.13 | — | `/civ` commands; city screen; tech list; simple strategic map | M | L | A player can play the MVP without commands except setup |
-| F1.15 | Networking + visibility | P0 | F1.14 | — | Snapshot/delta packets, per-civ filtering | M | M | Client never receives unexplored tiles or unseen armies (packet inspection test) |
+| F1.14 ✅ (needs in-game check) | Commands + minimal UI | P0 | F1.7–F1.13 | — | `/civ` commands; city screen; tech list; simple strategic map | M | L | A player can play the MVP without commands except setup |
+| F1.15 ✅ | Networking + visibility | P0 | F1.14 | — | Snapshot/delta packets, per-civ filtering | M | M | Client never receives unexplored tiles or unseen armies (packet inspection test) |
 | F1.16 | Physical city marker | P1 | F1.7 | Structurize paste | Small blueprint per era/size | L | S | City Center surroundings visibly grow (tier blueprints) when city size thresholds pass |
 
 ## Phase 2 — Physical cities and economy

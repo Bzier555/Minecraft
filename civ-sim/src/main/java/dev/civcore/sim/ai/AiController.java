@@ -299,7 +299,7 @@ public final class AiController {
         return Optional.ofNullable(best);
     }
 
-    static String nextCityName(GameState s, Civilization civ) {
+    public static String nextCityName(GameState s, Civilization civ) {
         java.util.Set<String> used = new java.util.HashSet<>();
         for (City c : s.cities.values()) used.add(c.name.toLowerCase());
         int start = civ.id % CITY_NAMES.size();

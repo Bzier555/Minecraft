@@ -1,4 +1,6 @@
 {
   "block.civcore.city_center": "City Center",
-  "item.civcore.settler_charter": "Settler Charter"
+  "item.civcore.settler_charter": "Settler Charter",
+  "key.civcore.map": "Open strategic map",
+  "key.categories.civcore": "Civ Core"
 }

@@ -41,7 +41,9 @@ APIs marked **(verified)** were compiled and run in the spike mod ([spikes/integ
 | 9 (part) | ✅ Cities now yield from tiles: centre + one worked tile per citizen within 2 tiles; citizens eat 2 food; starvation shrinks cities |
 | 9 Armies, war, victory | ✅ Abstract armies (stacks of up to 10), A* on tiles (terrain costs, mountains and water blocked, closed borders at peace), Civ-V-style combat, sieges, capture (tiles transfer, capital moves), healing, settlers found cities, war and two-sided peace, domination + score victory, elimination. Army markers in the world: one armor stand per army in the civ's colour, rebuilt from state (never trusted from disk) |
 | 10 AI v0 | ✅ `dev.civcore.sim.ai`: deterministic rules + utility scoring; per-civ aggression personality; issues only normal Commands. It researches, fills production (garrison, settlers up to 4 cities, buildings, army), moves settlers to scored sites, declares war when clearly stronger, gathers armies at a staging city and attacks the cheapest reachable enemy city, defends threatened cities, and makes peace when losing. Rules added while tuning: idle stacks on a tile merge (max 10); a 20-turn war cooldown after peace; armies are sent home when peace is signed. `/civ addai [name]` adds an AI civ at the best free start |
-| 8, 11–12 | Not started. Next: culture border growth (8), visibility/fog of war (F1.15), then the map and city screens (11) |
+| 11 UI + networking | ✅ Code complete, **not yet tried in a client**. The server sends each player a fog-of-war-filtered `ClientView` (gzipped JSON payload); the client sends actions (move, queue, research, settle, war, peace) that become that player's Commands. Screens: **strategic map** (key **Y** or `/civ map`; terrain, borders, cities, armies; drag to pan, wheel to zoom; left-click selects, right-click moves the selected army; side panel with settle, manage-city and war/peace buttons), **city screen** (right-click your City Center; yields, growth, queue, click to build), **tech screen** |
+| F1.15 fog of war | ✅ Per-civ explored tiles (cities 3, armies 2, players walking 2 tiles of vision). Enemy armies are shown only while in sight; unmet civs and unexplored tiles are never sent. The AI still reads the whole map (to fix in F4.x) |
+| 8, 12 | Not started. Next: culture border growth (8), then the MVP play-test (12) |
 
 **Headless AI results** (`gradlew :civ-sim:aiBatch -Pgames=100 [-Pcivs=4]`, synthetic one-continent maps, 400-turn limit):
 
@@ -270,7 +272,7 @@ Run [H's playable script](H-mvp.md#playable-script-acceptance-test) on a dedicat
 | Risk | Early signal | Response |
 |---|---|---|
 | Exotic Worlds API or behaviour changes (pre-1.0) | Seam tests fail after an update | Pin the version. Rerun `seam_tests.py`, `seam_terrain.py` and `seam_stress.py` before each bump |
-| Another mod with custom pathfinding crashes at the seam | "Ticking entity" mentioning `exotic_worlds$shiftBy` | Our seam guard covers any path with a null target. Report other patterns upstream |
+| Another mod with custom pathfinding crashes at the seam | "Ticking entity" mentioning `exotic_worlds$shiftBy` | Our seam guard covers any path with a null target; extend it in Civ Core for new patterns (no upstream fixes are planned) |
 | Noise sampling doesn't match generated terrain | Tiles marked land are ocean in the world | Sample pregenerated heightmaps instead |
 | Strategic map too slow | FPS drops on Medium | Bake the map to a `DynamicTexture` |
 | AI stalls | Zero-growth civs in headless runs | Fallback rules; scenario tests |

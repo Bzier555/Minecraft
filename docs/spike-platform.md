@@ -63,7 +63,7 @@ A small test mod ([`spikes/integration-mod/`](../spikes/integration-mod/), GPL-3
 
 | # | Test | Result |
 |---|---|---|
-| 10 | **Crash: Exotic Worlds × Recruits async pathfinding** | ❌→✅ **Fixed by us.** Exotic Worlds' `PathMixin.exotic_worlds$shiftBy` offsets vanilla `Path#target` without a null check. Recruits' `AsyncPath` passes `null` to `super(…)` and keeps its real target in its own field, so *every* async recruit path crossing the seam crashed the server ("Ticking entity" NPE), and the JVM then hung instead of exiting. Fix: [`SeamSnapGuardMixin`](../spikes/integration-mod/src/main/java/dev/civcore/spike/mixin/SeamSnapGuardMixin.java) runs just before Exotic Worlds' `SeamSnap.shiftNavigation` and drops any path whose vanilla target is null; the mob re-plans next tick on the new side. **Verified:** with async pathfinding **on**, 10 recruits made 8 crossings, the guard fired 74 times (each one would have been a crash), and there were 0 crashes. The same fix should be filed upstream with Exotic Worlds |
+| 10 | **Crash: Exotic Worlds × Recruits async pathfinding** | ❌→✅ **Fixed by us.** Exotic Worlds' `PathMixin.exotic_worlds$shiftBy` offsets vanilla `Path#target` without a null check. Recruits' `AsyncPath` passes `null` to `super(…)` and keeps its real target in its own field, so *every* async recruit path crossing the seam crashed the server ("Ticking entity" NPE), and the JVM then hung instead of exiting. Fix: [`SeamSnapGuardMixin`](../spikes/integration-mod/src/main/java/dev/civcore/spike/mixin/SeamSnapGuardMixin.java) runs just before Exotic Worlds' `SeamSnap.shiftNavigation` and drops any path whose vanilla target is null; the mob re-plans next tick on the new side. **Verified:** with async pathfinding **on**, 10 recruits made 8 crossings, the guard fired 74 times (each one would have been a crash), and there were 0 crashes. The guard is Civ Core's permanent fix; nothing will be filed upstream |
 | 11 | Several colonies owned by one proxy (FakePlayer) | ✅ Calling `IColonyManager.createColony` directly bypasses the one-colony-per-owner check. The proxy `nationA` owns colonies 1 and 2, `nationB` owns colony 3. `getIColonyByOwner` returns only the first, so Civ Core must keep its own city → colony map |
 | 12 | Colony claim and building across the seam | ✅ A builder hut placed at x = −1004 registered to colony 1, whose town hall is at x = 990, 44 blocks away across the seam. A `BUILD 0→1` work order was created at the wrapped position. The colony border wraps |
 | 13 | Proxy-owned colony ACTIVE with no real player | ❌ **Not possible without mixins.** MineColonies explicitly rejects FakePlayers as subscribers (`ColonyPackageManager.addCloseSubscriber` / `addImportantColonyPlayer`: "Adding fakeplayer as subscriber: this should not happen"), and a colony is ACTIVE only with real subscribers. **This matches the plan:** distant cities run abstractly in Civ Core, and colonies run when a real player is near. Builder progress therefore needs the client checklist |
@@ -115,13 +115,13 @@ A small test mod ([`spikes/integration-mod/`](../spikes/integration-mod/), GPL-3
 **What this means:**
 - MineColonies cities must not straddle a seam. The plan already says "forbid cities within N tiles of a seam" and "put seams in ocean" ([E §3](E-world-wrapping.md#3-technical-analysis-of-seamless-wrapping)). This is now a **hard rule**: no city centre within 3 tiles (192 blocks) of a seam, and Civ Core rejects colony buildings whose wrapped and raw distances to the town hall differ.
 - On seed 0 the east–west seam is ocean at 126 of 128 points, so this costs little.
-- A real fix would be a MineColonies navigation compat inside Exotic Worlds, which is where its other compat mixins live. That is an upstream request, not something we patch: MineColonies' addon policy discourages mixins into its code.
+- A real fix would be a MineColonies navigation compat inside Exotic Worlds, which is where its other compat mixins live. We won't pursue that upstream, and MineColonies' addon policy discourages mixins into its code, so the exclusion zone is the fix.
 - Recruits (move orders, §3b row 16) and MineColonies (this row) both show the same pattern: **mods with custom pathfinding need the seam handled for them.** Civ Core's adapters own that job (nearest-copy targets; no cross-seam assignments).
 
 ## 6. Decision
 
 Update after the integration spike: still **GO**, with two required mitigations:
-1. Ship the seam-guard mixin in Civ Core's Exotic Worlds compat module, and file the null-check fix upstream.
+1. Ship the seam-guard mixin in Civ Core as a permanent fix (no upstream fix is planned).
 2. Build nearest-copy order translation into the Recruits bridge.
 
 The MineColonies fake-player restriction confirms the abstract-city design and does not change it.

@@ -33,7 +33,13 @@ public class CityCenterBlock extends Block {
             player.sendSystemMessage(Component.literal("This City Center belongs to no city."));
             return InteractionResult.CONSUME;
         }
-        player.sendSystemMessage(Component.literal(CityInfo.describe(s.get(), city.get())));
+        boolean mine = s.get().civOfMember(player.getStringUUID()).map(c -> c.id == city.get().civId).orElse(false);
+        if (mine && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+            ServerGame.current().ifPresent(g -> dev.civcore.mod.net.CivNetwork.sendView(g, sp));
+            dev.civcore.mod.net.CivNetwork.open(sp, "city", city.get().id);
+        } else {
+            player.sendSystemMessage(Component.literal(CityInfo.describe(s.get(), city.get())));
+        }
         return InteractionResult.CONSUME;
     }
 }

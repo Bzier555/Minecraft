@@ -259,6 +259,7 @@ public final class Simulation {
         }
         Military.step(s, r, events);
         Victory.check(s, events);
+        dev.civcore.sim.view.Visibility.update(s, java.util.Map.of());
         return events;
     }
 

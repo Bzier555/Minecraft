@@ -46,6 +46,14 @@ public final class CivCommands {
             .then(Commands.literal("status").executes(CivCommands::status))
             .then(Commands.literal("techs").executes(CivCommands::techs))
             .then(Commands.literal("tile").executes(CivCommands::tile))
+            .then(Commands.literal("map").executes(ctx -> {
+                ServerPlayer p = ctx.getSource().getPlayerOrException();
+                return game(ctx).map(g -> {
+                    dev.civcore.mod.net.CivNetwork.sendView(g, p);
+                    dev.civcore.mod.net.CivNetwork.open(p, "map", 0);
+                    return 1;
+                }).orElse(0);
+            }))
             .then(Commands.literal("civs").executes(CivCommands::civs))
             .then(Commands.literal("armies").executes(CivCommands::armies))
             .then(Commands.literal("move")
