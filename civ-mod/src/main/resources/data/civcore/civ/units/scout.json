@@ -1,0 +1,7 @@
+{
+  "id": "civcore:scout",
+  "cost": 20,
+  "strength": 1,
+  "moves": 3,
+  "requiresTech": null
+}

@@ -1,0 +1,8 @@
+{
+  "id": "civcore:market",
+  "cost": 70,
+  "requiresTech": "civcore:currency",
+  "yields": {
+    "gold": 2
+  }
+}

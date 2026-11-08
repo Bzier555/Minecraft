@@ -1,0 +1,12 @@
+.gradle/
+build/
+out/
+run/
+runs/
+*.iml
+.idea/
+spikes/**/build/
+spikes/**/.gradle/
+civ-mod/libs/
+__pycache__/
+*.log

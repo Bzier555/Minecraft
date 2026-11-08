@@ -1,0 +1,8 @@
+{
+  "id": "civcore:granary",
+  "cost": 40,
+  "requiresTech": "civcore:pottery",
+  "yields": {
+    "food": 2
+  }
+}

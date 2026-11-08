@@ -1,0 +1,8 @@
+{
+  "id": "civcore:monument",
+  "cost": 30,
+  "requiresTech": null,
+  "yields": {
+    "culture": 2
+  }
+}

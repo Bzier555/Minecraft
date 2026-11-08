@@ -1,0 +1,17 @@
+{
+  "id": "civcore:writing",
+  "era": "ancient",
+  "cost": 55,
+  "requires": [
+    "civcore:pottery"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:library"
+    ],
+    "units": [],
+    "stages": [
+      "civ_writing"
+    ]
+  }
+}

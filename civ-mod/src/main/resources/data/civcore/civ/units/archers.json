@@ -1,0 +1,7 @@
+{
+  "id": "civcore:archers",
+  "cost": 35,
+  "strength": 5,
+  "moves": 2,
+  "requiresTech": "civcore:archery"
+}

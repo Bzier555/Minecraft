@@ -1,0 +1,17 @@
+{
+  "id": "civcore:currency",
+  "era": "ancient",
+  "cost": 80,
+  "requires": [
+    "civcore:bronze_working"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:market"
+    ],
+    "units": [],
+    "stages": [
+      "civ_currency"
+    ]
+  }
+}

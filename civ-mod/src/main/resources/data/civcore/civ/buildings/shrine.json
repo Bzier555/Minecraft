@@ -1,0 +1,8 @@
+{
+  "id": "civcore:shrine",
+  "cost": 40,
+  "requiresTech": "civcore:calendar",
+  "yields": {
+    "culture": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "civcore:calendar",
+  "era": "ancient",
+  "cost": 80,
+  "requires": [
+    "civcore:pottery"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:shrine"
+    ],
+    "units": [],
+    "stages": [
+      "civ_calendar"
+    ]
+  }
+}

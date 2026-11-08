@@ -1,0 +1,8 @@
+{
+  "id": "civcore:walls",
+  "cost": 50,
+  "requiresTech": "civcore:masonry",
+  "yields": {
+    "defense": 5
+  }
+}

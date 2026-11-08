@@ -1,0 +1,6 @@
+{
+  "id": "civcore:barracks",
+  "cost": 50,
+  "requiresTech": "civcore:bronze_working",
+  "yields": {}
+}

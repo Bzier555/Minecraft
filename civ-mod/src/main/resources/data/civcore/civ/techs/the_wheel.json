@@ -1,0 +1,17 @@
+{
+  "id": "civcore:the_wheel",
+  "era": "ancient",
+  "cost": 55,
+  "requires": [
+    "civcore:animal_husbandry"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:chariot"
+    ],
+    "stages": [
+      "civ_the_wheel"
+    ]
+  }
+}

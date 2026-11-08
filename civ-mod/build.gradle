@@ -1,0 +1,72 @@
+// NeoForge platform layer. Depends on civ-sim; civ-sim classes are packed into this mod's jar.
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+evaluationDependsOn(':civ-sim')
+
+base { archivesName = mod_id }
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+}
+
+neoForge {
+    version = project.neo_version
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+    runs {
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+            sourceSet(project(':civ-sim').sourceSets.main)
+        }
+    }
+}
+
+dependencies {
+    implementation project(':civ-sim')
+    // Optional integrations are compiled against the pinned spike jars until maven coordinates are confirmed (J §3 step 1).
+    def spikeMods = file(System.getProperty('user.home') + '/civ-spike-server/mods')
+    // Exotic Worlds' public API; their maven branch was not reachable on 2026-11-08, so compile against the nested jar
+    // extracted from the installed mod (civ-mod/libs is git-ignored; see README Building).
+    compileOnly fileTree(dir: 'libs', include: ['exotic_worlds-*.jar'])
+    compileOnly fileTree(dir: spikeMods, include: ['minecolonies-*.jar', 'structurize-*.jar', 'blockui-*.jar', 'domum-ornamentum-*.jar', 'recruits-*.jar', 'open-parties-and-claims-*.jar'])
+}
+
+jar {
+    from(project(':civ-sim').sourceSets.main.output)
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata

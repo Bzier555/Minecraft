@@ -1,0 +1,17 @@
+{
+  "id": "civcore:pottery",
+  "era": "ancient",
+  "cost": 35,
+  "requires": [
+    "civcore:agriculture"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:granary"
+    ],
+    "units": [],
+    "stages": [
+      "civ_pottery"
+    ]
+  }
+}

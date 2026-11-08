@@ -1,0 +1,35 @@
+// Pure-Java strategic simulation. MUST NOT depend on Minecraft, NeoForge or any mod (enforced by ArchitectureTest).
+plugins {
+    id 'java-library'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Minecraft ships Gson 2.10.x at runtime; the mod jar does not bundle it.
+    api 'com.google.code.gson:gson:2.10.1'
+
+    testImplementation platform('org.junit:junit-bom:5.11.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'net.jqwik:jqwik:1.9.1'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'jqwik'
+    }
+}
+
+// Headless AI-vs-AI batch: gradlew :civ-sim:aiBatch -Pgames=100 -Pcivs=2 -Pturns=400
+tasks.register('aiBatch', JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.civcore.sim.ai.HeadlessGames'
+    workingDir = projectDir
+    args = [project.findProperty('games') ?: '100', project.findProperty('civs') ?: '2', project.findProperty('turns') ?: '400']
+}

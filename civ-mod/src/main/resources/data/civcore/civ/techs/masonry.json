@@ -1,0 +1,17 @@
+{
+  "id": "civcore:masonry",
+  "era": "ancient",
+  "cost": 55,
+  "requires": [
+    "civcore:mining"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:walls"
+    ],
+    "units": [],
+    "stages": [
+      "civ_masonry"
+    ]
+  }
+}

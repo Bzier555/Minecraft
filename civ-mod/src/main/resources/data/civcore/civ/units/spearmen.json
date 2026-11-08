@@ -1,0 +1,7 @@
+{
+  "id": "civcore:spearmen",
+  "cost": 45,
+  "strength": 11,
+  "moves": 2,
+  "requiresTech": "civcore:bronze_working"
+}

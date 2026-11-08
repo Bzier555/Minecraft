@@ -1,0 +1,15 @@
+{
+  "id": "civcore:mining",
+  "era": "ancient",
+  "cost": 35,
+  "requires": [
+    "civcore:agriculture"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_mining"
+    ]
+  }
+}

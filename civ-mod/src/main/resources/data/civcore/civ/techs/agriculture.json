@@ -1,0 +1,13 @@
+{
+  "id": "civcore:agriculture",
+  "era": "ancient",
+  "cost": 20,
+  "requires": [],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_agriculture"
+    ]
+  }
+}

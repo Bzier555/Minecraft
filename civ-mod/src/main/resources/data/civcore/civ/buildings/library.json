@@ -1,0 +1,8 @@
+{
+  "id": "civcore:library",
+  "cost": 60,
+  "requiresTech": "civcore:writing",
+  "yields": {
+    "science": 2
+  }
+}

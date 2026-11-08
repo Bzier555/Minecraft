@@ -1,0 +1,7 @@
+{
+  "id": "civcore:chariot",
+  "cost": 55,
+  "strength": 10,
+  "moves": 4,
+  "requiresTech": "civcore:the_wheel"
+}

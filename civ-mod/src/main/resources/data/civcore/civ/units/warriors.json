@@ -1,0 +1,7 @@
+{
+  "id": "civcore:warriors",
+  "cost": 25,
+  "strength": 6,
+  "moves": 2,
+  "requiresTech": null
+}

@@ -1,0 +1,19 @@
+{
+  "id": "civcore:bronze_working",
+  "era": "ancient",
+  "cost": 55,
+  "requires": [
+    "civcore:mining"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:barracks"
+    ],
+    "units": [
+      "civcore:spearmen"
+    ],
+    "stages": [
+      "civ_bronze_working"
+    ]
+  }
+}

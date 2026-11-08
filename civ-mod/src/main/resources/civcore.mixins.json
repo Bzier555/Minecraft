@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.civcore.mod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "PathAccessor",
+    "SeamSnapGuardMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

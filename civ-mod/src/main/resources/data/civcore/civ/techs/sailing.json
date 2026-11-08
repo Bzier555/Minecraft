@@ -1,0 +1,15 @@
+{
+  "id": "civcore:sailing",
+  "era": "ancient",
+  "cost": 55,
+  "requires": [
+    "civcore:pottery"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_sailing"
+    ]
+  }
+}

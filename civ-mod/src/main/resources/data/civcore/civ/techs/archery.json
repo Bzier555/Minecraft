@@ -1,0 +1,17 @@
+{
+  "id": "civcore:archery",
+  "era": "ancient",
+  "cost": 35,
+  "requires": [
+    "civcore:agriculture"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:archers"
+    ],
+    "stages": [
+      "civ_archery"
+    ]
+  }
+}

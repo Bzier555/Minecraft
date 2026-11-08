@@ -1,0 +1,7 @@
+{
+  "id": "civcore:settlers",
+  "cost": 50,
+  "strength": 0,
+  "moves": 2,
+  "requiresTech": null
+}

@@ -1,0 +1,11 @@
+{
+  "id": "civcore:palace",
+  "cost": 100,
+  "requiresTech": null,
+  "yields": {
+    "production": 2,
+    "science": 2,
+    "gold": 2,
+    "culture": 1
+  }
+}
