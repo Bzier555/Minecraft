@@ -320,9 +320,7 @@ public final class Military {
             }
         }
         newCiv.cityIds.add(c.id);
-        for (TilePos p : s.topology().within(c.tile(), 1)) {
-            if (s.map.owner(p) == oldId) s.map.setOwner(p, a.civId);
-        }
+        Culture.transferOnCapture(s, c, oldId);
         events.add(newCiv.name + " captured " + c.name + (oldCiv == null ? "" : " from " + oldCiv.name) + "!");
     }
 

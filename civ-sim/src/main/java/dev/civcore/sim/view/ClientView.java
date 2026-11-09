@@ -31,6 +31,7 @@ public final class ClientView {
     public String currentResearch;
     public int researchProgress;
     public int gold;
+    public int culture;
     public int winnerCivId = -1;
     public String victoryType = "";
 
@@ -53,6 +54,7 @@ public final class ClientView {
         // own cities only:
         public boolean mine;
         public int food, foodNeeded, foodYield, foodEaten, production, productionYield, goldYield;
+        public int culture, cultureNeeded, cultureYield;
         public List<String> queue = new ArrayList<>();
         public List<String> buildings = new ArrayList<>();
         public List<Item> available = new ArrayList<>();

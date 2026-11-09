@@ -134,6 +134,7 @@ public final class ViewBuilder {
             v.currentResearch = me.currentResearch;
             v.researchProgress = me.researchProgress;
             v.gold = me.gold;
+            v.culture = me.culture;
             for (Ruleset.TechDef t : r.techs().values()) {
                 ClientView.TechInfo ti = new ClientView.TechInfo();
                 ti.id = t.id();
@@ -161,6 +162,9 @@ public final class ViewBuilder {
         ci.production = c.productionStored;
         ci.productionYield = y.production() + b.getOrDefault("production", 0);
         ci.goldYield = y.gold() + b.getOrDefault("gold", 0);
+        ci.culture = c.cultureStored;
+        ci.cultureNeeded = dev.civcore.sim.rules.Culture.threshold(c.cultureTiles);
+        ci.cultureYield = dev.civcore.sim.rules.Culture.cityCulture(c, r);
         ci.queue.addAll(c.productionQueue);
         ci.buildings.addAll(c.buildings);
         for (Ruleset.BuildingDef bd : r.buildings().values()) {

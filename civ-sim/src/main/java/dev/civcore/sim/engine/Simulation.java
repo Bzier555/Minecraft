@@ -58,6 +58,7 @@ public final class Simulation {
             case DeclareWar w -> declareWar(s, w);
             case ProposePeace p -> proposePeace(s, p);
             case SettleWithArmy sw -> settleWithArmy(s, r, sw);
+            case dev.civcore.sim.command.Command.DequeueProduction d -> dequeue(s, d);
         };
     }
 
@@ -216,6 +217,15 @@ public final class Simulation {
         return CommandResult.ok("Researching " + tech.id() + " (" + tech.cost() + " science).");
     }
 
+    static CommandResult dequeue(GameState s, dev.civcore.sim.command.Command.DequeueProduction d) {
+        Optional<Civilization> civ = s.civOfMember(d.issuer());
+        City city = s.cities.get(d.cityId());
+        if (civ.isEmpty() || city == null || city.civId != civ.get().id) return CommandResult.fail("Not your city.");
+        if (d.index() < 0 || d.index() >= city.productionQueue.size()) return CommandResult.fail("Nothing at that place in the queue.");
+        String removed = city.productionQueue.remove(d.index());
+        return CommandResult.ok(city.name + " will no longer build " + removed + ".");
+    }
+
     static CommandResult queueProduction(GameState s, Ruleset r, QueueProduction q) {
         Optional<Civilization> civ = s.civOfMember(q.issuer());
         City city = s.cities.get(q.cityId());
@@ -257,6 +267,7 @@ public final class Simulation {
             civ.gold += gold;
             research(civ, r, science, events);
         }
+        dev.civcore.sim.rules.Culture.step(s, r, events);
         Military.step(s, r, events);
         Victory.check(s, events);
         dev.civcore.sim.view.Visibility.update(s, java.util.Map.of());

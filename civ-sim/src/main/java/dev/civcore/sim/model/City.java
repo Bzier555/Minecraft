@@ -25,6 +25,9 @@ public final class City {
     /** Founded as its civ's first city: counts for domination victory. */
     public boolean originalCapital;
     public int foodStored;
+    public int cultureStored;
+    /** Tiles this city has added to its civ's borders through culture. */
+    public int cultureTiles;
     public int productionStored;
     public List<String> buildings = new ArrayList<>();
     public List<String> productionQueue = new ArrayList<>();

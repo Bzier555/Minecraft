@@ -24,6 +24,8 @@ public final class Civilization {
     public String currentResearch;
     public int researchProgress;
     public int gold;
+    /** Culture earned over the whole game (for a future culture victory). */
+    public int culture;
     /** No cities and no armies left. */
     public boolean eliminated;
 

@@ -12,6 +12,7 @@ import java.util.List;
 
 /** One of the player's cities: growth, yields, buildings and the production queue (click an item to queue it). */
 public class CityScreen extends Screen {
+    private static final int QUEUE_TOP = 112;
     private final long cityId;
     private final Screen parent;
     private final List<Button> itemButtons = new ArrayList<>();
@@ -57,6 +58,18 @@ public class CityScreen extends Screen {
         itemButtons.clear();
         ClientView.CityInfo c = city();
         if (c == null) return;
+        // queue entries: click to remove
+        for (int i = 0; i < c.queue.size() && i < 8; i++) {
+            int index = i;
+            Button q = Button.builder(Component.literal("x  " + ClientCivState.shortId(c.queue.get(i))), btn -> {
+                CivNetwork.Action a = new CivNetwork.Action();
+                a.type = "dequeue";
+                a.id = cityId;
+                a.x = index;
+                ClientCivState.send(a);
+            }).bounds(12, QUEUE_TOP + i * 20, Math.min(180, width / 2 - 24), 18).build();
+            itemButtons.add(addRenderableWidget(q));
+        }
         int x = width / 2 + 10, y = 40, w = Math.min(200, width / 2 - 20);
         for (ClientView.Item it : c.available) {
             if (y > height - 40) break;
@@ -96,18 +109,13 @@ public class CityScreen extends Screen {
         line(g, x, y, "Production +" + c.productionYield + "   stored " + c.production);
         y += 12;
         line(g, x, y, "Gold +" + c.goldYield + "   Defence " + c.hp + "/100");
-        y += 18;
-        g.drawString(font, "Building now:", x, y, 0xFFD700);
         y += 12;
-        if (c.queue.isEmpty()) {
-            line(g, x, y, "(nothing - pick something on the right)");
-            y += 12;
-        }
-        for (String q : c.queue) {
-            line(g, x, y, "- " + ClientCivState.shortId(q));
-            y += 12;
-        }
-        y += 6;
+        int toBorder = c.cultureYield <= 0 ? 0 : (int) Math.ceil((c.cultureNeeded - c.culture) / (double) c.cultureYield);
+        line(g, x, y, "Culture +" + c.cultureYield + "   " + c.culture + "/" + c.cultureNeeded + " (border grows in " + Math.max(0, toBorder) + ")");
+        y += 14;
+        g.drawString(font, "Building now (click to remove):", x, y, 0xFFD700);
+        if (c.queue.isEmpty()) line(g, x, QUEUE_TOP + 4, "(nothing - pick something on the right)");
+        y = QUEUE_TOP + Math.max(1, Math.min(8, c.queue.size())) * 20 + 6;
         g.drawString(font, "Buildings:", x, y, 0xFFD700);
         y += 12;
         for (String b : c.buildings) {

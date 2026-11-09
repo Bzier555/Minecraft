@@ -67,7 +67,7 @@ public final class CivNetwork {
 
     /** What a client may ask for. Anything else is ignored. */
     public static final class Action {
-        public String type; // view | move | queue | research | settle | war | peace
+        public String type; // view | move | queue | dequeue (x = index) | research | settle | war | peace
         public long id;
         public int x, z;
         public String item;
@@ -102,6 +102,7 @@ public final class CivNetwork {
             Command cmd = switch (a.type) {
                 case "move" -> new Command.MoveArmy(me, a.id, a.x, a.z);
                 case "queue" -> new Command.QueueProduction(me, a.id, a.item);
+                case "dequeue" -> new Command.DequeueProduction(me, a.id, a.x);
                 case "research" -> new Command.SetResearch(me, a.item);
                 case "settle" -> new Command.SettleWithArmy(me, a.id, a.name == null || a.name.isBlank() ? g.defaultCityName(me) : a.name.trim());
                 case "war" -> new Command.DeclareWar(me, a.civ);

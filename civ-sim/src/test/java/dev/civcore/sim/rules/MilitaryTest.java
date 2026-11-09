@@ -162,6 +162,46 @@ class MilitaryTest {
     }
 
     @Test
+    void bordersGrowWithCulture() {
+        int before = g.map.countOwnedBy(alice.id);
+        rome.buildings.add("civcore:monument"); // +2 culture, palace +1, base +1 = 4 per turn
+        turns(4);
+        assertEquals(before + 1, g.map.countOwnedBy(alice.id), "first tile after 15 culture");
+        assertEquals(1, rome.cultureTiles);
+        turns(30);
+        assertTrue(rome.cultureTiles >= 4, "keeps growing, tiles=" + rome.cultureTiles);
+        assertTrue(alice.culture >= 4 * 34);
+        for (int z = 0; z < 32; z++) for (int x = 0; x < 32; x++) {
+            TilePos p = new TilePos(x, z);
+            if (g.map.owner(p) == alice.id) assertTrue(g.topology().chebyshev(p, rome.tile()) <= Culture.BORDER_RADIUS, "within reach: " + p);
+        }
+    }
+
+    @Test
+    void captureTakesTheCitysCultureTiles() {
+        carthage.buildings.add("civcore:monument");
+        turns(30);
+        int bobTiles = g.map.countOwnedBy(bob.id);
+        assertTrue(bobTiles > 9);
+        ok(new DeclareWar(A, bob.id));
+        Army a = army(alice, 14, 16, "civcore:spearmen", 8);
+        ok(new MoveArmy(A, a.id, 16, 16));
+        for (int i = 0; i < 40 && carthage.civId != alice.id; i++) turns(1);
+        assertEquals(alice.id, carthage.civId);
+        assertEquals(0, g.map.countOwnedBy(bob.id), "bob had one city: all its tiles change hands");
+    }
+
+    @Test
+    void queueItemsCanBeRemoved() {
+        ok(new QueueProduction(A, rome.id, "civcore:warriors"));
+        ok(new QueueProduction(A, rome.id, "civcore:monument"));
+        ok(new dev.civcore.sim.command.Command.DequeueProduction(A, rome.id, 0));
+        assertEquals(List.of("civcore:monument"), rome.productionQueue);
+        assertFalse(Simulation.apply(g, rules, new dev.civcore.sim.command.Command.DequeueProduction(B, rome.id, 0)).ok());
+        assertFalse(Simulation.apply(g, rules, new dev.civcore.sim.command.Command.DequeueProduction(A, rome.id, 5)).ok());
+    }
+
+    @Test
     void oldSavesGetOriginalCapitalsOnLoad() {
         rome.originalCapital = false; // as written by a build before the field existed
         GameState back = GameStateCodec.fromJson(GameStateCodec.toJson(g));
