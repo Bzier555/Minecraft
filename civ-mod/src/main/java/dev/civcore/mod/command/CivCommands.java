@@ -133,6 +133,17 @@ public final class CivCommands {
                             .then(Commands.argument("n", IntegerArgumentType.integer(1, 10))
                                 .then(Commands.argument("tx", IntegerArgumentType.integer())
                                     .then(Commands.argument("tz", IntegerArgumentType.integer()).executes(CivCommands::adminArmy)))))))
+                .then(Commands.literal("observe")
+                    .then(Commands.literal("clear").executes(ctx -> {
+                        if (net.neoforged.fml.ModList.get().isLoaded("recruits")) ObserveHook.clear();
+                        return msg(ctx, "Observers cleared.");
+                    }))
+                    .then(Commands.argument("x", IntegerArgumentType.integer())
+                        .then(Commands.argument("z", IntegerArgumentType.integer()).executes(ctx -> {
+                            if (!net.neoforged.fml.ModList.get().isLoaded("recruits")) return reply(ctx, CommandResult.fail("Recruits is not installed."));
+                            ObserveHook.add(IntegerArgumentType.getInteger(ctx, "x"), IntegerArgumentType.getInteger(ctx, "z"));
+                            return msg(ctx, "Armies near that point now materialise as if a player were there.");
+                        }))))
                 .then(Commands.literal("turnlimit")
                     .then(Commands.argument("turn", IntegerArgumentType.integer(0)).executes(CivCommands::turnLimit)))
                 .then(Commands.literal("probe")
@@ -301,6 +312,17 @@ public final class CivCommands {
             + " biome=" + dev.civcore.mod.world.MinecraftTerrainSampler.classify(realBiome) + " (" + realBiome.getRegisteredName() + ")");
     }
 
+    /** Keeps Recruits-dependent classes out of this class's constant pool resolution until used. */
+    private static final class ObserveHook {
+        static void add(int x, int z) {
+            dev.civcore.mod.army.RecruitsProjection.OBSERVERS.add(new net.minecraft.world.phys.Vec3(x, 64, z));
+        }
+
+        static void clear() {
+            dev.civcore.mod.army.RecruitsProjection.OBSERVERS.clear();
+        }
+    }
+
     private static final String[] AI_NAMES = {"Aurelian League", "Kingdom of Brann", "Corsair Republic", "Duchy of Elm",
         "Free Cities of Ost", "Iron Khanate", "Jade Dominion", "Moorland Clans"};
 
@@ -369,7 +391,7 @@ public final class CivCommands {
             a.civId = civ.get().id;
             a.tileX = t.x();
             a.tileZ = t.z();
-            for (int i = 0; i < n; i++) a.units.add(new dev.civcore.sim.model.Army.Unit(unit));
+            for (int i = 0; i < n; i++) a.units.add(dev.civcore.sim.rules.Military.newUnit(s, unit));
             s.armies.put(a.id, a);
             g.syncWorld();
             return reply(ctx, CommandResult.ok("Army " + a.id + " (" + n + " " + unit + ") placed at " + t + "."));

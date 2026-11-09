@@ -155,7 +155,7 @@ public final class Military {
         boolean settler = SETTLERS.equals(unitType);
         for (Army a : armiesOn(s, city.tile())) {
             if (a.civId == city.civId && a.path.isEmpty() && a.units.size() < MAX_STACK && a.hasUnit(SETTLERS) == settler) {
-                a.units.add(new Army.Unit(unitType));
+                a.units.add(newUnit(s, unitType));
                 return a;
             }
         }
@@ -164,9 +164,15 @@ public final class Military {
         a.civId = city.civId;
         a.tileX = city.tileX;
         a.tileZ = city.tileZ;
-        a.units.add(new Army.Unit(unitType));
+        a.units.add(newUnit(s, unitType));
         s.armies.put(a.id, a);
         return a;
+    }
+
+    public static Army.Unit newUnit(GameState s, String type) {
+        Army.Unit u = new Army.Unit(type);
+        u.uid = s.allocateId();
+        return u;
     }
 
     // ------------------------------------------------------------------ strategic step
@@ -219,7 +225,7 @@ public final class Military {
         Map<String, Army> keep = new HashMap<>();
         for (Long id : new ArrayList<>(s.armies.keySet())) {
             Army a = s.armies.get(id);
-            if (!a.path.isEmpty()) continue;
+            if (!a.path.isEmpty() || a.physical) continue; // physical stacks keep their soldiers' identity
             String key = a.civId + "@" + a.tileX + "," + a.tileZ + (a.hasUnit(SETTLERS) ? "s" : "m");
             Army into = keep.get(key);
             if (into == null || into.units.size() + a.units.size() > MAX_STACK) {
@@ -279,6 +285,7 @@ public final class Military {
     }
 
     private static void battle(GameState s, Ruleset r, Army att, Army def, TilePos at, List<String> events) {
+        if (att.physical && def.physical) return; // both sides are soldiers in the world: they fight there
         Random rng = rng(s, att.id, def.id);
         double a = strength(att, r);
         double d = strength(def, r) * terrainDefense(s, at) * (cityOn(s, at).isPresent() ? 1.5 : 1.0);
@@ -325,8 +332,23 @@ public final class Military {
     }
 
     private static void applyDamage(Army a, int dmg) {
+        if (dmg <= 0) return;
         for (Army.Unit u : a.units) u.hp -= dmg;
         a.units.removeIf(u -> u.hp <= 0);
+        a.revision++;
+    }
+
+    /** A projected soldier died in the world: remove its unit. Returns the army if it was destroyed. */
+    public static Optional<Army> unitKilled(GameState s, long armyId, long uid, List<String> events) {
+        Army a = s.armies.get(armyId);
+        if (a == null) return Optional.empty();
+        a.units.removeIf(u -> u.uid == uid);
+        if (a.units.isEmpty()) {
+            s.armies.remove(a.id);
+            events.add(civName(s, a.civId) + "'s army was destroyed in battle.");
+            return Optional.of(a);
+        }
+        return Optional.empty();
     }
 
     private static void removeIfDestroyed(GameState s, Army a, List<String> events) {

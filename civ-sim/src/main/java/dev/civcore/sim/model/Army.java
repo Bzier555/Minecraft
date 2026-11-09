@@ -13,6 +13,8 @@ public final class Army {
     public static final int FULL_HP = 100;
 
     public static final class Unit {
+        /** Stable id (links a unit to its soldier entity while the army is physical). 0 = not yet assigned. */
+        public long uid;
         public String type;
         public int hp = FULL_HP;
 
@@ -31,8 +33,15 @@ public final class Army {
     public int tileZ;
     /** Remaining path (tile coordinates as [x,z] pairs), first element is the next step. Empty = holding. */
     public List<int[]> path = new ArrayList<>();
-    /** Bumped whenever the army's physical projection must be rebuilt (generation rule, D §7.2). */
+    /** Bumped whenever the army's marker must be redrawn (moves, merges). */
     public int generation;
+    /**
+     * True while the army exists as soldier entities near a player (set by the mod's projection). Physical-vs-physical
+     * battles are fought in the world, not by the abstract combat rules (docs/D-architecture.md §7).
+     */
+    public boolean physical;
+    /** Bumped when the rules change units' health abstractly, so physical soldiers are rebuilt to match. */
+    public int revision;
 
     public Army() {
     }

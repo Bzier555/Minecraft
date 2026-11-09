@@ -57,9 +57,9 @@
 
 | ID | Feature | Pri | Depends | Reuse | Custom work | Risk | Effort | Acceptance criteria |
 |---|---|---|---|---|---|---|---|---|
-| F3.1 | Projection manager (generation tags) | P1 | F1.11 | NeoForge ticket controllers | Materialise/dematerialise lifecycle | VH | L | 1,000 randomized materialise/unload/crash cycles: zero duplicated or lost units |
-| F3.2 | Recruits army projection | P1 | F3.1, S0.4 | Recruits | `civ-compat-recruits` | H | L | Army near player appears as recruits with right count/HP; orders from strategic map move them |
-| F3.3 | Physical battle feedback | P1 | F3.2 | — | Casualty/HP write-back, battle start/end detection | H | M | Kill 3 recruits → army record shows 3 fewer units |
+| F3.1 ✅ | Projection manager (generation tags) | P1 | F1.11 | NeoForge ticket controllers | Materialise/dematerialise lifecycle | VH | L | 1,000 randomized materialise/unload/crash cycles: zero duplicated or lost units |
+| F3.2 ✅ | Recruits army projection | P1 | F3.1, S0.4 | Recruits | `civ-compat-recruits` | H | L | Army near player appears as recruits with right count/HP; orders from strategic map move them |
+| F3.3 ✅ | Physical battle feedback | P1 | F3.2 | — | Casualty/HP write-back, battle start/end detection | H | M | Kill 3 recruits → army record shows 3 fewer units |
 | F3.4 | Physical siege and capture | P1 | F3.2 | — | City Center hold timer, war-time protection rules | M | M | Holding center with no defenders for timer captures city in physical play |
 | F3.5 | Naval units | P2 | F3.2 | Small Ships | Ship projection, embarkation | H | L | Fleet materialises as ships with crew; transports carry armies |
 | F3.6 | Upkeep and supply | P1 | F1.11 | — | Gold upkeep, supply attrition | L | S | Negative gold disbands units; out-of-supply units lose HP |

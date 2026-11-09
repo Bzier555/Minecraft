@@ -34,6 +34,10 @@ public final class GameStateCodec {
         }
         state.map.ensureTerrainArrays();
         markMissingOriginalCapitals(state);
+        for (var a : state.armies.values()) {
+            a.physical = false; // projections never survive a restart
+            for (var u : a.units) if (u.uid == 0) u.uid = state.allocateId();
+        }
         if (state.map.analysed && state.map.resource == null) dev.civcore.sim.worldplan.ResourcePlacer.place(state);
         return state;
     }

@@ -39,6 +39,9 @@ public final class CivCoreMod {
         game.addListener(BuiltinTerritory::onPlace);
         game.addListener(CivCoreMod::giveStarterCharter);
         game.addListener(dev.civcore.mod.army.ArmyMarkers::onEntityJoin);
+        game.addListener((net.neoforged.neoforge.event.entity.living.LivingDeathEvent e) -> {
+            if (!e.getEntity().level().isClientSide) ServerGame.current().ifPresent(g -> g.onSoldierDeath(e.getEntity()));
+        });
         game.addListener((AddReloadListenerEvent e) -> e.addListener(new RulesetReloadListener()));
         game.addListener((RegisterCommandsEvent e) -> CivCommands.register(e.getDispatcher()));
         game.addListener((ServerStartedEvent e) -> ServerGame.start(e.getServer()));

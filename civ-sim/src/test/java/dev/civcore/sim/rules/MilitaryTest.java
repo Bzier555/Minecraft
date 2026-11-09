@@ -60,7 +60,7 @@ class MilitaryTest {
         a.civId = civ.id;
         a.tileX = tx;
         a.tileZ = tz;
-        for (int i = 0; i < n; i++) a.units.add(new Army.Unit(type));
+        for (int i = 0; i < n; i++) a.units.add(Military.newUnit(g, type));
         g.armies.put(a.id, a);
         return a;
     }
@@ -189,6 +189,39 @@ class MilitaryTest {
         for (int i = 0; i < 40 && carthage.civId != alice.id; i++) turns(1);
         assertEquals(alice.id, carthage.civId);
         assertEquals(0, g.map.countOwnedBy(bob.id), "bob had one city: all its tiles change hands");
+    }
+
+    @Test
+    void physicalArmiesFightInTheWorldNotByTheRules() {
+        ok(new DeclareWar(A, bob.id));
+        Army mine = army(alice, 12, 10, "civcore:spearmen", 3);
+        Army theirs = army(bob, 13, 10, "civcore:warriors", 3);
+        mine.physical = true;
+        theirs.physical = true;
+        ok(new MoveArmy(A, mine.id, 13, 10));
+        turns(3);
+        assertEquals(3, theirs.units.size());
+        assertTrue(theirs.units.stream().allMatch(u -> u.hp == Army.FULL_HP), "no abstract damage");
+        long uid = theirs.units.get(0).uid;
+        Military.unitKilled(g, theirs.id, uid, new java.util.ArrayList<>());
+        assertEquals(2, theirs.units.size());
+        Military.unitKilled(g, theirs.id, theirs.units.get(0).uid, new java.util.ArrayList<>());
+        Military.unitKilled(g, theirs.id, theirs.units.get(0).uid, new java.util.ArrayList<>());
+        assertFalse(g.armies.containsKey(theirs.id));
+        theirs.physical = false;
+        mine.physical = false;
+    }
+
+    @Test
+    void unitsHaveStableIdsAndProjectionsResetOnLoad() {
+        Army a = army(alice, 12, 10, "civcore:spearmen", 2);
+        a.physical = true;
+        a.units.get(0).uid = 0;
+        GameState back = GameStateCodec.fromJson(GameStateCodec.toJson(g));
+        Army b = back.armies.get(a.id);
+        assertFalse(b.physical);
+        assertTrue(b.units.stream().allMatch(u -> u.uid != 0));
+        assertNotEquals(b.units.get(0).uid, b.units.get(1).uid);
     }
 
     @Test

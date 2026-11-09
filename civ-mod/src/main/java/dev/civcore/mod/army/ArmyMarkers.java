@@ -45,7 +45,7 @@ public final class ArmyMarkers {
             Army a = s.armies.get(e.getKey());
             Entity ent = level.getEntity(e.getValue());
             if (ent == null) return true; // unloaded or killed; recreated below if still wanted
-            if (a == null || ent.getPersistentData().getInt(KEY_GEN) != a.generation) {
+            if (a == null || a.physical || ent.getPersistentData().getInt(KEY_GEN) != a.generation) {
                 ent.discard();
                 return true;
             }
@@ -57,7 +57,7 @@ public final class ArmyMarkers {
         for (Army a : s.armies.values()) {
             long tileKey = ((long) a.tileX << 32) | (a.tileZ & 0xffffffffL);
             int slot = slotOnTile.merge(tileKey, 1, Integer::sum) - 1;
-            if (markers.containsKey(a.id)) continue;
+            if (markers.containsKey(a.id) || a.physical) continue;
             int x = m.centerBlockX(a.tile()) + 2 + slot * 2;
             int z = m.centerBlockZ(a.tile()) + 2;
             if (!level.hasChunk(x >> 4, z >> 4)) continue;
@@ -109,7 +109,9 @@ public final class ArmyMarkers {
      * the generation rule and cannot duplicate an army.
      */
     public static void onEntityJoin(EntityJoinLevelEvent e) {
-        if (e.loadedFromDisk() && e.getEntity().getTags().contains(TAG)) e.setCanceled(true);
+        if (e.loadedFromDisk() && (e.getEntity().getTags().contains(TAG) || e.getEntity().getTags().contains("civcore.soldier"))) {
+            e.setCanceled(true); // markers and soldiers are rebuilt from the game state, never loaded
+        }
     }
 
     /** Places City Center blocks for cities founded without a known height (settlers), once their chunk is loaded. */

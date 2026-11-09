@@ -45,7 +45,32 @@ APIs marked **(verified)** were compiled and run in the spike mod ([spikes/integ
 | F1.15 fog of war | ✅ Per-civ explored tiles (cities 3, armies 2, players walking 2 tiles of vision). Enemy armies are shown only while in sight; unmet civs and unexplored tiles are never sent. The AI still reads the whole map (to fix in F4.x) |
 | 8 Culture borders | ✅ Cities earn culture (1 + monument 2, shrine 1, palace 1) and at 15, 25, 35… culture claim the best unowned tile touching their territory, within 3 tiles. Captured cities take the tiles closer to them than to the old owner's other cities. Civ culture is totalled for a later culture victory. City screen shows culture progress; queued items can be removed |
 | F2.5 + F2.9 resources and happiness | ✅ Nine resources placed from the seed after analysis (none in the seam band): bonus (wheat, cattle, fish, stone), strategic (iron after Bronze Working, horses after Animal Husbandry), luxury (gems, furs, wine). They add tile yields. Strategic resources inside your borders limit units: Chariots need horses, and the new Swordsmen (strength 14) need iron, one per unit while it exists. Happiness = 6 + 4 per distinct luxury + buildings (Palace 2, Shrine 2) − 2 per city − half the population. Below 0, growth is quartered; at −10 or less, production drops by a third and no settlers can be trained. The AI respects resource limits, values luxury and strategic sites, builds happiness when low, and stops settling when unhappy. Map shows resources and a happiness/resource line |
+| F3.1–F3.3 Recruits soldiers | ✅ `RecruitsProjection` (loaded only with Recruits):
+<br>- **Materialise:** an army turns into Recruits soldiers when a player comes within 128 blocks (warriors/swordsmen/scouts as recruits, spearmen as shieldmen, archers as bowmen, chariots as horsemen, era gear, each at its unit's health).
+<br>- **Dematerialise:** beyond 192 blocks the soldiers' health is written back and they are removed.
+<br>- **Teams:** each civ is a scoreboard team, and Civ Core's wars set Recruits' team diplomacy to ENEMY. Soldiers stay in neutral stance, so they never fight at peace.
+<br>- **Engagement:** when enemy physical armies are within one tile, or enemies within 24 blocks, soldiers walk to the nearest foe and attack.
+<br>- **Battles:** physical-vs-physical battles skip abstract combat. Each soldier's death removes exactly its unit.
+<br>- **Loading:** soldiers are never loaded from disk, so nothing duplicates. Abstract damage (a siege) rebuilds the soldiers at their new health.
+<br>- **Testing aid:** `/civ admin observe <x> <z>` makes a spot count as "player nearby". |
 | 12 MVP play-test | Next. All MVP systems exist; run [H's script](H-mvp.md#playable-script-acceptance-test) with real players |
+
+**Soldier test on the spike server** (`spikes/neoforge-1.21.1/soldier_test.py`, AI civs at war):
+- Armies near an observer became 27 soldiers on their civs' teams.
+- 10 League spearmen against 10 Brann warriors on adjacent tiles: both Brann armies were destroyed soldier by soldier, and casualties and health were written back.
+- Clearing the observer removed all soldiers and restored the markers. Re-observing brought them back.
+- Server stop wrote health back (a spearman saved at 86%); after a restart, 0 soldiers loaded from disk.
+
+**Lessons:**
+- Recruits won't melee while it has a move order, and drops targets it can't see. Engaged soldiers are steered to within 5 blocks of a foe first.
+- Entities only tick in player-loaded or force-loaded chunks, so the test must force-load the battlefield.
+
+**Limitations:**
+- Settlers stay as markers.
+- No ships yet.
+- Cities have no physical defenders, so sieges stay abstract.
+- Soldiers regenerate health in the world faster than abstract healing.
+- Recruits' hunger and morale are topped up each second. Consider `RecruitsUpdateHungerAndMorale=false` in the pack config.
 
 After resources and happiness: AI batch 99% domination with 2 civs (100 games) and 100% with 4 civs (20 games), 0 rejected commands. 56 civ-sim tests.
 

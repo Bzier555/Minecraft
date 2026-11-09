@@ -41,6 +41,23 @@ public final class ServerGame {
     private GameState state; // null until /civ newgame
     private final dev.civcore.mod.army.ArmyMarkers markers = new dev.civcore.mod.army.ArmyMarkers();
     private int tickCounter;
+    /** RecruitsProjection when the Recruits mod is installed (typed Object so the class loads only then). */
+    private final Object projection = net.neoforged.fml.ModList.get().isLoaded("recruits") ? RecruitsHook.create() : null;
+
+    /** Isolates every reference to Recruits-dependent code. */
+    private static final class RecruitsHook {
+        static Object create() {
+            return new dev.civcore.mod.army.RecruitsProjection();
+        }
+
+        static void sync(Object p, net.minecraft.server.level.ServerLevel level, GameState s) {
+            ((dev.civcore.mod.army.RecruitsProjection) p).sync(level, s);
+        }
+
+        static void stop(Object p, net.minecraft.server.level.ServerLevel level, GameState s) {
+            ((dev.civcore.mod.army.RecruitsProjection) p).dematerialiseAll(level, s);
+        }
+    }
     private boolean pauseWhenEmpty = true;
     /**
      * World analysis runs on background threads: sampling the generator costs ~100-200 ms per tile with Tectonic
@@ -76,8 +93,22 @@ public final class ServerGame {
     }
 
     public static void stop() {
-        if (instance != null) instance.save();
+        if (instance != null) {
+            if (instance.projection != null && instance.state != null) {
+                RecruitsHook.stop(instance.projection, instance.server.overworld(), instance.state);
+            }
+            instance.save();
+        }
         instance = null;
+    }
+
+    /** A projected soldier died in the world (any mod or player killed it): remove its unit. */
+    public void onSoldierDeath(net.minecraft.world.entity.LivingEntity e) {
+        if (state == null || !e.getTags().contains("civcore.soldier")) return;
+        List<String> events = new java.util.ArrayList<>();
+        dev.civcore.sim.rules.Military.unitKilled(state, e.getPersistentData().getLong("civcore.army_id"),
+            e.getPersistentData().getLong("civcore.unit_uid"), events);
+        for (String ev : events) server.getPlayerList().broadcastSystemMessage(Component.literal("[Civ] " + ev), false);
     }
 
     public static Optional<ServerGame> current() {
@@ -232,6 +263,7 @@ public final class ServerGame {
         dev.civcore.sim.view.Visibility.update(state, memberTiles());
         var level = server.overworld();
         dev.civcore.mod.army.ArmyMarkers.placePendingCityCenters(level, state);
+        if (projection != null) RecruitsHook.sync(projection, level, state);
         markers.sync(level, state);
     }
 
