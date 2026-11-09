@@ -1,0 +1,18 @@
+{
+  "id": "civcore:construction",
+  "era": "medieval",
+  "cost": 130,
+  "requires": [
+    "civcore:masonry",
+    "civcore:the_wheel"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:colosseum"
+    ],
+    "units": [],
+    "stages": [
+      "civ_construction"
+    ]
+  }
+}

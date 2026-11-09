@@ -1,0 +1,9 @@
+{
+  "id": "civcore:steam_expedition",
+  "cost": 600,
+  "requiresTech": "civcore:steam_power",
+  "yields": {
+    "national": 1,
+    "science_project": 2
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "civcore:world_exhibition",
+  "cost": 800,
+  "requiresTech": "civcore:railroad",
+  "yields": {
+    "national": 1,
+    "science_project": 3
+  }
+}

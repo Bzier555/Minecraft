@@ -1,0 +1,18 @@
+{
+  "id": "civcore:railroad",
+  "era": "industrial",
+  "cost": 560,
+  "requires": [
+    "civcore:industrialization",
+    "civcore:navigation"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:world_exhibition"
+    ],
+    "units": [],
+    "stages": [
+      "civ_railroad"
+    ]
+  }
+}

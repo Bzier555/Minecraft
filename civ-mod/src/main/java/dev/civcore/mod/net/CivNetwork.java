@@ -103,6 +103,8 @@ public final class CivNetwork {
                 case "move" -> new Command.MoveArmy(me, a.id, a.x, a.z);
                 case "queue" -> new Command.QueueProduction(me, a.id, a.item);
                 case "dequeue" -> new Command.DequeueProduction(me, a.id, a.x);
+                case "government" -> new Command.ChangeGovernment(me, a.item);
+                case "policy" -> new Command.AdoptPolicy(me, a.item);
                 case "research" -> new Command.SetResearch(me, a.item);
                 case "settle" -> new Command.SettleWithArmy(me, a.id, a.name == null || a.name.isBlank() ? g.defaultCityName(me) : a.name.trim());
                 case "war" -> new Command.DeclareWar(me, a.civ);
@@ -112,7 +114,8 @@ public final class CivNetwork {
             if (cmd != null) {
                 CommandResult r = g.submit(cmd);
                 player.displayClientMessage(Component.literal(r.message()), true);
-                if (r.ok() && (cmd instanceof Command.DeclareWar || cmd instanceof Command.ProposePeace || cmd instanceof Command.SettleWithArmy)) {
+                if (r.ok() && (cmd instanceof Command.DeclareWar || cmd instanceof Command.ProposePeace || cmd instanceof Command.SettleWithArmy
+                    || cmd instanceof Command.ChangeGovernment)) {
                     player.server.getPlayerList().broadcastSystemMessage(Component.literal("[Civ] " + r.message()), false);
                 }
                 if (r.ok()) g.syncWorld();

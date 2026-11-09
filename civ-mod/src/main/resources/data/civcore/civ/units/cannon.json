@@ -1,0 +1,8 @@
+{
+  "id": "civcore:cannon",
+  "cost": 150,
+  "strength": 22,
+  "moves": 2,
+  "requiresTech": "civcore:metallurgy",
+  "requiresResource": "civcore:iron"
+}

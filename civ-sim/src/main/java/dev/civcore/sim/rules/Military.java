@@ -152,9 +152,9 @@ public final class Military {
 
     /** A city finished a unit: join a holding army of the same kind on the city tile, or form a new one. */
     public static Army spawnUnit(GameState s, City city, String unitType) {
-        boolean settler = SETTLERS.equals(unitType);
+        String kind = kindOf(unitType);
         for (Army a : armiesOn(s, city.tile())) {
-            if (a.civId == city.civId && a.path.isEmpty() && a.units.size() < MAX_STACK && a.hasUnit(SETTLERS) == settler) {
+            if (a.civId == city.civId && a.path.isEmpty() && a.units.size() < MAX_STACK && kindOf(a).equals(kind)) {
                 a.units.add(newUnit(s, unitType));
                 return a;
             }
@@ -167,6 +167,17 @@ public final class Military {
         a.units.add(newUnit(s, unitType));
         s.armies.put(a.id, a);
         return a;
+    }
+
+    public static final String SCOUT = "civcore:scout";
+
+    /** Stacks only merge with their own kind: settlers, scouts and fighting units stay apart. */
+    static String kindOf(String unitType) {
+        return SETTLERS.equals(unitType) ? "settlers" : SCOUT.equals(unitType) ? "scouts" : "military";
+    }
+
+    static String kindOf(Army a) {
+        return a.units.isEmpty() ? "military" : kindOf(a.units.get(0).type);
     }
 
     public static Army.Unit newUnit(GameState s, String type) {
@@ -226,7 +237,7 @@ public final class Military {
         for (Long id : new ArrayList<>(s.armies.keySet())) {
             Army a = s.armies.get(id);
             if (!a.path.isEmpty() || a.physical) continue; // physical stacks keep their soldiers' identity
-            String key = a.civId + "@" + a.tileX + "," + a.tileZ + (a.hasUnit(SETTLERS) ? "s" : "m");
+            String key = a.civId + "@" + a.tileX + "," + a.tileZ + kindOf(a);
             Army into = keep.get(key);
             if (into == null || into.units.size() + a.units.size() > MAX_STACK) {
                 keep.put(key, a);
@@ -284,11 +295,18 @@ public final class Military {
         return (int) Math.max(1, Math.min(Army.FULL_HP, Math.round(d)));
     }
 
+    /** Army strength including its civ's government and policy bonuses. */
+    public static double effectiveStrength(GameState s, Army a, Ruleset r) {
+        Civilization c = s.civs.get(a.civId);
+        int pct = c == null ? 0 : Civics.modifiers(s, c).strengthPct();
+        return strength(a, r) * (100 + pct) / 100.0;
+    }
+
     private static void battle(GameState s, Ruleset r, Army att, Army def, TilePos at, List<String> events) {
         if (att.physical && def.physical) return; // both sides are soldiers in the world: they fight there
         Random rng = rng(s, att.id, def.id);
-        double a = strength(att, r);
-        double d = strength(def, r) * terrainDefense(s, at) * (cityOn(s, at).isPresent() ? 1.5 : 1.0);
+        double a = effectiveStrength(s, att, r);
+        double d = effectiveStrength(s, def, r) * terrainDefense(s, at) * (cityOn(s, at).isPresent() ? 1.5 : 1.0);
         int toDef = damage(a, d, rng);
         int toAtt = damage(d, a, rng);
         applyDamage(att, toAtt);
@@ -301,7 +319,7 @@ public final class Military {
 
     private static void siege(GameState s, Ruleset r, Army att, City c, List<String> events) {
         Random rng = rng(s, att.id, c.id);
-        double a = strength(att, r);
+        double a = effectiveStrength(s, att, r);
         double d = cityStrength(s, c, r);
         int toCity = damage(a, d, rng);
         int toAtt = damage(d, a, rng) / 2; // cities hit back weaker than armies
@@ -357,9 +375,31 @@ public final class Military {
         }
     }
 
+    /** Armies farther than this from their own cities, outside their borders, are out of supply. */
+    public static final int SUPPLY_RANGE = 6;
+    public static final int ATTRITION = 5;
+
+    public static boolean inSupply(GameState s, Army a) {
+        if (s.map.owner(a.tile()) == a.civId) return true;
+        for (City c : s.cities.values()) {
+            if (c.civId == a.civId && s.topology().chebyshev(c.tile(), a.tile()) <= SUPPLY_RANGE) return true;
+        }
+        return false;
+    }
+
     private static void heal(GameState s, List<String> events, Set<Long> fought, Set<Long> citiesHit) {
-        for (Army a : s.armies.values()) {
-            if (fought.contains(a.id)) continue;
+        for (Army a : List.copyOf(s.armies.values())) {
+            if (fought.contains(a.id) || a.physical) continue;
+            if (!inSupply(s, a)) {
+                for (Army.Unit u : a.units) u.hp -= ATTRITION;
+                a.units.removeIf(u -> u.hp <= 0);
+                a.revision++;
+                if (a.units.isEmpty()) {
+                    s.armies.remove(a.id);
+                    events.add(civName(s, a.civId) + "'s army starved far from home.");
+                }
+                continue;
+            }
             int amount = s.map.owner(a.tile()) == a.civId ? HEAL_OWN_TERRITORY : HEAL_ELSEWHERE;
             for (Army.Unit u : a.units) u.hp = Math.min(Army.FULL_HP, u.hp + amount);
         }

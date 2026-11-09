@@ -1,0 +1,8 @@
+{
+  "id": "civcore:musketmen",
+  "cost": 140,
+  "strength": 24,
+  "moves": 2,
+  "requiresTech": "civcore:gunpowder",
+  "requiresResource": null
+}

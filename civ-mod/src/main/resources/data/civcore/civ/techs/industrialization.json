@@ -1,0 +1,18 @@
+{
+  "id": "civcore:industrialization",
+  "era": "industrial",
+  "cost": 500,
+  "requires": [
+    "civcore:steam_power",
+    "civcore:economics"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:factory"
+    ],
+    "units": [],
+    "stages": [
+      "civ_industrialization"
+    ]
+  }
+}

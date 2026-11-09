@@ -1,0 +1,8 @@
+{
+  "id": "civcore:pikemen",
+  "cost": 80,
+  "strength": 16,
+  "moves": 2,
+  "requiresTech": "civcore:feudalism",
+  "requiresResource": null
+}

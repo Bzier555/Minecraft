@@ -1,0 +1,8 @@
+{
+  "id": "civcore:aqueduct",
+  "cost": 120,
+  "requiresTech": "civcore:engineering",
+  "yields": {
+    "food": 2
+  }
+}

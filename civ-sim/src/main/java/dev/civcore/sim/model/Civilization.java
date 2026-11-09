@@ -26,6 +26,14 @@ public final class Civilization {
     public int gold;
     /** Culture earned over the whole game (for a future culture victory). */
     public int culture;
+    /** Culture spent on policies. */
+    public int cultureSpent;
+    /** Civics.Government name; null = despotism. */
+    public String government;
+    /** Adopted Civics.Policy names. */
+    public List<String> policies = new ArrayList<>();
+    /** No science or gold until this turn (after changing government). */
+    public long anarchyUntilTurn;
     /** National happiness last strategic tick (see Resources.happiness). */
     public int happiness;
     /** No cities and no armies left. */

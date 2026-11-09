@@ -53,7 +53,26 @@ APIs marked **(verified)** were compiled and run in the spike mod ([spikes/integ
 <br>- **Battles:** physical-vs-physical battles skip abstract combat. Each soldier's death removes exactly its unit.
 <br>- **Loading:** soldiers are never loaded from disk, so nothing duplicates. Abstract damage (a siege) rebuilds the soldiers at their new health.
 <br>- **Testing aid:** `/civ admin observe <x> <z>` makes a spot count as "player nearby". |
-| 12 MVP play-test | Next. All MVP systems exist; run [H's script](H-mvp.md#playable-script-acceptance-test) with real players |
+| Eras and civics (F5.2–F5.4, F3.6, F4.3–F4.5) | ✅ The Medieval and Early Industrial eras (`tools/gen_ruleset_eras.py`) bring the content to 36 techs, 23 buildings and 14 units.
+<br>- **Governments:** Despotism → Monarchy, Republic, Theocracy, Merchant Republic, Constitutional Monarchy. Policy slots and bonuses; 2 turns of anarchy on change.
+<br>- **Policies:** 8, bought with culture, at 60 + 60 per policy adopted.
+<br>- **Upkeep and supply:** 2 free units per city, 1 gold each after that; bankruptcy makes a unit desert. Armies more than 6 tiles from their cities, outside their borders, lose 5 hp a turn.
+<br>- **City connections:** +2 gold per city with a land route to the capital, or a Harbor in both.
+<br>- **Victories:** science (3 national projects, in order) and culture (8,000 per 1,024 tiles); each victory type can be switched on or off.
+<br>- **AI:** only targets cities it has explored, builds a scout early, picks governments and policies by personality, builds the projects.
+<br>- **Offline governor:** runs an absent human civ's research, production and settling, with no war decisions.
+<br>- **UI and commands:** Civics screen; tech screen grouped by era; `/civ government`, `/civ policy`, `/civ admin victory|culturetarget|governor` |
+| 12 MVP play-test | **Waiting on a player:** [playtest-checklist.md](playtest-checklist.md) |
+
+**Results:**
+- AI batch: 2 civs, 40 games: 37 domination, 3 culture. 4 civs, 10 games: 8 domination, 2 science. 0 rejected commands. 69 civ-sim tests.
+- Spike server: an older save loaded, and a new 3-AI game ran 191 turns in 609 ms. The AIs adopted Monarchy and policies, and one won by domination.
+
+**Not built (needs a design decision or in-game checking first):**
+- An OPAC claims adapter. The proxy owner would block civ members in their own land unless OPAC parties and protection are configured; to check in-game.
+- MineColonies cities (Phase 2).
+- Physical sieges and naval units.
+- Foreign trade routes and roads.
 
 **Soldier test on the spike server** (`spikes/neoforge-1.21.1/soldier_test.py`, AI civs at war):
 - Armies near an observer became 27 soldiers on their civs' teams.

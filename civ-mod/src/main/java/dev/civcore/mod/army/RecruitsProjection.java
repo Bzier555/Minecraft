@@ -205,9 +205,10 @@ public final class RecruitsProjection {
 
     private AbstractRecruitEntity spawnSoldier(ServerLevel level, GameState s, Army a, Army.Unit u, Vec3 centre, int index) {
         EntityType<? extends AbstractRecruitEntity> type = switch (u.type) {
-            case "civcore:spearmen" -> ModEntityTypes.RECRUIT_SHIELDMAN.get();
+            case "civcore:spearmen", "civcore:pikemen" -> ModEntityTypes.RECRUIT_SHIELDMAN.get();
             case "civcore:archers" -> ModEntityTypes.BOWMAN.get();
-            case "civcore:chariot" -> ModEntityTypes.HORSEMAN.get();
+            case "civcore:crossbowmen", "civcore:musketmen", "civcore:riflemen", "civcore:cannon" -> ModEntityTypes.CROSSBOWMAN.get();
+            case "civcore:chariot", "civcore:horsemen", "civcore:knights" -> ModEntityTypes.HORSEMAN.get();
             default -> ModEntityTypes.RECRUIT.get();
         };
         AbstractRecruitEntity r = type.create(level);
@@ -245,6 +246,17 @@ public final class RecruitsProjection {
                 r.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
                 r.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
                 r.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+            }
+            case "civcore:pikemen" -> {
+                r.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+                r.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+                r.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                r.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.CHAINMAIL_CHESTPLATE));
+            }
+            case "civcore:knights" -> {
+                r.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+                r.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
+                r.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
             }
             case "civcore:spearmen" -> {
                 r.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STONE_SWORD));

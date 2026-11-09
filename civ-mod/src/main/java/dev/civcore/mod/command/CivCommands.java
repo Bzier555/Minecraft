@@ -46,6 +46,20 @@ public final class CivCommands {
             .then(Commands.literal("status").executes(CivCommands::status))
             .then(Commands.literal("techs").executes(CivCommands::techs))
             .then(Commands.literal("tile").executes(CivCommands::tile))
+            .then(Commands.literal("government")
+                .then(Commands.argument("government", StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(dev.civcore.sim.rules.Civics.Government.values()).map(Enum::name), b))
+                    .executes(ctx -> {
+                        ServerPlayer p = ctx.getSource().getPlayerOrException();
+                        return game(ctx).map(g -> reply(ctx, g.submit(new Command.ChangeGovernment(p.getStringUUID(), StringArgumentType.getString(ctx, "government").toUpperCase())))).orElse(0);
+                    })))
+            .then(Commands.literal("policy")
+                .then(Commands.argument("policy", StringArgumentType.word())
+                    .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(dev.civcore.sim.rules.Civics.Policy.values()).map(Enum::name), b))
+                    .executes(ctx -> {
+                        ServerPlayer p = ctx.getSource().getPlayerOrException();
+                        return game(ctx).map(g -> reply(ctx, g.submit(new Command.AdoptPolicy(p.getStringUUID(), StringArgumentType.getString(ctx, "policy").toUpperCase())))).orElse(0);
+                    })))
             .then(Commands.literal("map").executes(ctx -> {
                 ServerPlayer p = ctx.getSource().getPlayerOrException();
                 return game(ctx).map(g -> {
@@ -144,6 +158,24 @@ public final class CivCommands {
                             ObserveHook.add(IntegerArgumentType.getInteger(ctx, "x"), IntegerArgumentType.getInteger(ctx, "z"));
                             return msg(ctx, "Armies near that point now materialise as if a player were there.");
                         }))))
+                .then(Commands.literal("victory")
+                    .then(Commands.argument("type", StringArgumentType.word())
+                        .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"domination", "science", "culture", "score"}, b))
+                        .then(Commands.argument("on", com.mojang.brigadier.arguments.BoolArgumentType.bool()).executes(ctx -> game(ctx).map(g -> g.state().map(s -> {
+                            String type = StringArgumentType.getString(ctx, "type");
+                            if (com.mojang.brigadier.arguments.BoolArgumentType.getBool(ctx, "on")) s.victoryTypes.add(type); else s.victoryTypes.remove(type);
+                            return msg(ctx, "Victory types: " + s.victoryTypes);
+                        }).orElse(0)).orElse(0)))))
+                .then(Commands.literal("culturetarget")
+                    .then(Commands.argument("culture", IntegerArgumentType.integer(0)).executes(ctx -> game(ctx).map(g -> g.state().map(s -> {
+                        s.cultureVictoryCulture = IntegerArgumentType.getInteger(ctx, "culture");
+                        return msg(ctx, "Culture victory at " + dev.civcore.sim.rules.Victory.cultureTarget(s) + " culture.");
+                    }).orElse(0)).orElse(0))))
+                .then(Commands.literal("governor")
+                    .then(Commands.argument("on", com.mojang.brigadier.arguments.BoolArgumentType.bool()).executes(ctx -> game(ctx).map(g -> g.state().map(s -> {
+                        s.offlineGovernor = com.mojang.brigadier.arguments.BoolArgumentType.getBool(ctx, "on");
+                        return msg(ctx, "Offline governor " + (s.offlineGovernor ? "on" : "off") + ".");
+                    }).orElse(0)).orElse(0))))
                 .then(Commands.literal("turnlimit")
                     .then(Commands.argument("turn", IntegerArgumentType.integer(0)).executes(CivCommands::turnLimit)))
                 .then(Commands.literal("probe")

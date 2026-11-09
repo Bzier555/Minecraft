@@ -1,0 +1,18 @@
+{
+  "id": "civcore:military_science",
+  "era": "industrial",
+  "cost": 520,
+  "requires": [
+    "civcore:metallurgy",
+    "civcore:industrialization"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:riflemen"
+    ],
+    "stages": [
+      "civ_military_science"
+    ]
+  }
+}

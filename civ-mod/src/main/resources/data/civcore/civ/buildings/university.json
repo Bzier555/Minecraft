@@ -1,0 +1,8 @@
+{
+  "id": "civcore:university",
+  "cost": 200,
+  "requiresTech": "civcore:printing_press",
+  "yields": {
+    "science": 3
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "civcore:steam_power",
+  "era": "industrial",
+  "cost": 460,
+  "requires": [
+    "civcore:scientific_theory",
+    "civcore:metallurgy"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:steam_expedition"
+    ],
+    "units": [],
+    "stages": [
+      "civ_steam_power"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "civcore:cathedral",
+  "cost": 160,
+  "requiresTech": "civcore:theology",
+  "yields": {
+    "culture": 3,
+    "happiness": 2
+  }
+}

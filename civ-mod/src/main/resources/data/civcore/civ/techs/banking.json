@@ -1,0 +1,18 @@
+{
+  "id": "civcore:banking",
+  "era": "industrial",
+  "cost": 320,
+  "requires": [
+    "civcore:civil_service",
+    "civcore:currency"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:bank"
+    ],
+    "units": [],
+    "stages": [
+      "civ_banking"
+    ]
+  }
+}

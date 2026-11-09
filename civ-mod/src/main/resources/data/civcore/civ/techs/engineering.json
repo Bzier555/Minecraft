@@ -1,0 +1,18 @@
+{
+  "id": "civcore:engineering",
+  "era": "medieval",
+  "cost": 160,
+  "requires": [
+    "civcore:construction",
+    "civcore:mathematics"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:aqueduct"
+    ],
+    "units": [],
+    "stages": [
+      "civ_engineering"
+    ]
+  }
+}

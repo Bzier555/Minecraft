@@ -1,0 +1,8 @@
+{
+  "id": "civcore:bank",
+  "cost": 180,
+  "requiresTech": "civcore:banking",
+  "yields": {
+    "gold": 3
+  }
+}

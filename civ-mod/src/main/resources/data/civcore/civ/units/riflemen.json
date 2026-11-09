@@ -1,0 +1,8 @@
+{
+  "id": "civcore:riflemen",
+  "cost": 200,
+  "strength": 34,
+  "moves": 2,
+  "requiresTech": "civcore:military_science",
+  "requiresResource": "civcore:iron"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "civcore:horsemen",
+  "cost": 70,
+  "strength": 12,
+  "moves": 4,
+  "requiresTech": "civcore:horseback_riding",
+  "requiresResource": "civcore:horses"
+}

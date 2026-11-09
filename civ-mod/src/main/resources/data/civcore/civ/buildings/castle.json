@@ -1,0 +1,8 @@
+{
+  "id": "civcore:castle",
+  "cost": 140,
+  "requiresTech": "civcore:feudalism",
+  "yields": {
+    "defense": 8
+  }
+}

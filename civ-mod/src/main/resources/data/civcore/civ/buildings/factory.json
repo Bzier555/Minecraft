@@ -1,0 +1,8 @@
+{
+  "id": "civcore:factory",
+  "cost": 280,
+  "requiresTech": "civcore:industrialization",
+  "yields": {
+    "production": 4
+  }
+}

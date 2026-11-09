@@ -241,6 +241,14 @@ public class StrategicMapScreen extends Screen {
             g.drawString(font, "Luxuries: " + String.join(", ", v.luxuries), x, y, 0xE070FF);
             y += 11;
         }
+        if (v.government != null) {
+            g.drawString(font, ClientCivState.shortId(v.government.toLowerCase()) + (v.anarchyTurns > 0 ? " (anarchy " + v.anarchyTurns + ")" : "")
+                + " | upkeep " + v.upkeep, x, y, 0xC0C0FF);
+            y += 11;
+            StringBuilder vic = new StringBuilder("Culture " + v.culture + "/" + v.cultureTarget + " | Projects " + v.scienceProjects + "/3");
+            g.drawString(font, vic.toString(), x, y, 0xA0A0A0);
+            y += 11;
+        }
         if (v.winnerCivId >= 0) {
             ClientView.CivInfo w = ClientCivState.civ(v.winnerCivId);
             g.drawString(font, (w == null ? "?" : w.name) + " won (" + v.victoryType + ")", x, y, 0xFFD700);
@@ -320,7 +328,8 @@ public class StrategicMapScreen extends Screen {
         ClientView v = ClientCivState.view();
         int x = mapWidth() + 6, w = PANEL - 12;
         int y = height - 24;
-        add(Button.builder(Component.literal("Technologies"), b -> minecraft.setScreen(new TechScreen(this))).bounds(x, y, w, 20).build());
+        add(Button.builder(Component.literal("Technologies"), b -> minecraft.setScreen(new TechScreen(this))).bounds(x, y, w / 2 - 2, 20).build());
+        add(Button.builder(Component.literal("Civics"), b -> minecraft.setScreen(new CivicsScreen(this))).bounds(x + w / 2 + 2, y, w / 2 - 2, 20).build());
         y -= 24;
         if (v == null) return;
         ClientView.ArmyInfo army = selectedArmy(v);

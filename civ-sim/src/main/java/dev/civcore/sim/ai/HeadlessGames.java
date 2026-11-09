@@ -100,13 +100,16 @@ public final class HeadlessGames {
         lines.add("seed,winner,victory,turns,cities,techs,failedCommands,wars,peaces,captures,firstWarTurn");
         for (int i = 1; i <= games; i++) {
             Result r = play(rules, i, civs, maxTurns);
-            if (r.victoryType().equals("domination")) domination++;
+            if (!r.victoryType().equals("score")) domination++;
             turnsSum += r.turns();
             lines.add(r.seed() + "," + r.winner() + "," + r.victoryType() + "," + r.turns() + "," + r.citiesPerCiv().values()
                 + "," + r.techsPerCiv().values() + "," + r.failedCommands() + "," + r.wars() + "," + r.peaces() + "," + r.captures() + "," + r.firstWarTurn() + (r.firstRejection().isEmpty() ? "" : ",\"" + r.firstRejection() + "\""));
         }
         lines.forEach(System.out::println);
-        System.out.printf("SUMMARY games=%d civs=%d domination=%d (%.0f%%) avgTurns=%.0f%n",
+        java.util.Map<String, Long> byType = new java.util.TreeMap<>();
+        for (String l : lines.subList(1, lines.size())) byType.merge(l.split(",")[2], 1L, Long::sum);
+        System.out.println("BY TYPE " + byType);
+        System.out.printf("SUMMARY games=%d civs=%d decisive=%d (%.0f%%) avgTurns=%.0f%n",
             games, civs, domination, 100.0 * domination / games, (double) turnsSum / games);
     }
 

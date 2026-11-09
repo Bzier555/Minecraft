@@ -1,0 +1,18 @@
+{
+  "id": "civcore:economics",
+  "era": "industrial",
+  "cost": 380,
+  "requires": [
+    "civcore:banking",
+    "civcore:printing_press"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:great_survey"
+    ],
+    "units": [],
+    "stages": [
+      "civ_economics"
+    ]
+  }
+}

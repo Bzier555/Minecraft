@@ -1,0 +1,18 @@
+{
+  "id": "civcore:optics",
+  "era": "medieval",
+  "cost": 140,
+  "requires": [
+    "civcore:sailing",
+    "civcore:mathematics"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:harbor"
+    ],
+    "units": [],
+    "stages": [
+      "civ_optics"
+    ]
+  }
+}

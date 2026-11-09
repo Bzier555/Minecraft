@@ -1,0 +1,9 @@
+{
+  "id": "civcore:harbor",
+  "cost": 100,
+  "requiresTech": "civcore:optics",
+  "yields": {
+    "food": 1,
+    "gold": 1
+  }
+}

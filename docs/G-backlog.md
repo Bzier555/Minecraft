@@ -49,7 +49,7 @@
 | F2.4 | OPAC territory enforcement | P1 | S0.5, F1.8 | OPAC API | Adapter | M | M | Tiles claimed in OPAC within 1 s of ownership change; Xaero displays them |
 | F2.5 ✅ (no improvements yet) | Strategic resources | P1 | F1.6 | — | Deposits, improvements, stockpiles, physical markers | M | M | Iron deposit inside borders + mine → +iron; units requiring iron blocked without it |
 | F2.6 | Treasury block + currency | P1 | F1.9 | Lightman's Currency (optional) | Item→gold conversion with diminishing returns | M | M | Repeated deposits yield decreasing gold; blacklisted items refused |
-| F2.7 | Roads and connections | P2 | F1.11 | — | Road orders, path placement, connection bonus, fast travel | M | L | Connected cities gain gold; travel command teleports between connected cities |
+| F2.7 ◐ (connections, no roads) | Roads and connections | P2 | F1.11 | — | Road orders, path placement, connection bonus, fast travel | M | L | Connected cities gain gold; travel command teleports between connected cities |
 | F2.8 | Trade routes | P2 | F2.7 | — | Caravans, route yields, plunder | M | M | Route generates gold to both civs; enemy army on route stops it |
 | F2.9 ✅ | Happiness/stability | P1 | F1.9 | — | Happiness model, luxury resources | L | M | Expanding beyond limit causes growth penalty |
 
@@ -62,7 +62,7 @@
 | F3.3 ✅ | Physical battle feedback | P1 | F3.2 | — | Casualty/HP write-back, battle start/end detection | H | M | Kill 3 recruits → army record shows 3 fewer units |
 | F3.4 | Physical siege and capture | P1 | F3.2 | — | City Center hold timer, war-time protection rules | M | M | Holding center with no defenders for timer captures city in physical play |
 | F3.5 | Naval units | P2 | F3.2 | Small Ships | Ship projection, embarkation | H | L | Fleet materialises as ships with crew; transports carry armies |
-| F3.6 | Upkeep and supply | P1 | F1.11 | — | Gold upkeep, supply attrition | L | S | Negative gold disbands units; out-of-supply units lose HP |
+| F3.6 ✅ | Upkeep and supply | P1 | F1.11 | — | Gold upkeep, supply attrition | L | S | Negative gold disbands units; out-of-supply units lose HP |
 | F3.7 | AI tactical controller | P1 | F3.2 | Recruits AI | Orders for materialised AI armies (target, retreat) | H | L | AI army attacks player city physically and retreats below 30% strength |
 | F3.8 | Fallback soldier entity | P2 | F3.1 | vanilla AI | Simple own soldier if Recruits unavailable | M | M | Game playable with Recruits removed |
 
@@ -72,18 +72,18 @@
 |---|---|---|---|---|---|---|---|---|
 | F4.1 | Diplomacy model + UI | P1 | F1.15 | — | Relations, treaties, proposals | M | L | Player and AI can declare war, make peace with terms, open borders |
 | F4.2 | AI diplomacy | P1 | F4.1 | — | Opinion model, accept/propose | H | L | AI accepts peace when losing, denounces aggressors; seeded tests |
-| F4.3 | AI economy & research v1 | P1 | F1.12 | — | Personalities, goal planner, influence maps | H | XL | AI-only 4-civ games: varied winners by personality; no AI stalls (zero cities growing for 50 ticks) |
+| F4.3 ✅ | AI economy & research v1 | P1 | F1.12 | — | Personalities, goal planner, influence maps | H | XL | AI-only 4-civ games: varied winners by personality; no AI stalls (zero cities growing for 50 ticks) |
 | F4.4 | AI military v1 | P1 | F4.3, F3.6 | — | Threat assessment, army composition, siege planning | H | L | AI defends when threatened, captures weak neighbours |
-| F4.5 | Offline-nation AI governor | P2 | F4.3 | — | Hybrid controller | M | M | Offline human civ keeps producing defenders; never declares war |
+| F4.5 ✅ | Offline-nation AI governor | P2 | F4.3 | — | Hybrid controller | M | M | Offline human civ keeps producing defenders; never declares war |
 
 ## Phase 5 — Full integration
 
 | ID | Feature | Pri | Depends | Reuse | Custom work | Risk | Effort | Acceptance criteria |
 |---|---|---|---|---|---|---|---|---|
 | F5.1 | Full strategic map | P1 | F1.15 | — | Pan/zoom, overlays, wrapping, last-seen ghosts | M | L | All layers render for Medium map at 60 FPS |
-| F5.2 | Tech tree graph UI | P2 | F1.10 | — | Graph screen | L | M | Prerequisite lines; queue by clicking |
-| F5.3 | Governments + policies | P2 | F1.10 | — | Data-driven governments, policy cards | L | M | Switching government changes modifiers |
-| F5.4 | Science + culture victories | P2 | F1.13 | — | Project chains, culture victory | L | M | Each victory achievable in a test game |
+| F5.2 ◐ (era grid) | Tech tree graph UI | P2 | F1.10 | — | Graph screen | L | M | Prerequisite lines; queue by clicking |
+| F5.3 ✅ | Governments + policies | P2 | F1.10 | — | Data-driven governments, policy cards | L | M | Switching government changes modifiers |
+| F5.4 ✅ | Science + culture victories | P2 | F1.13 | — | Project chains, culture victory | L | M | Each victory achievable in a test game |
 | F5.5 | Exotic Worlds integration polish | P2 | S0.1 | Exotic Worlds API | World-shape binding, size presets in setup wizard, strategic map wrap rendering | M | M | Setup picks the preset; strategic map scrolls endlessly; circumnavigation by ship |
 | F5.6 | Game setup wizard + presets | P1 | F1.6 | — | GUI + config | L | M | New game configured without editing files |
 | F5.7 | City-states | P3 | F4.3 | Towns and Towers structures | Minor AI | M | L | — |

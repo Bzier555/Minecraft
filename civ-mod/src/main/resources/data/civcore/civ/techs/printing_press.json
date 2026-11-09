@@ -1,0 +1,18 @@
+{
+  "id": "civcore:printing_press",
+  "era": "industrial",
+  "cost": 300,
+  "requires": [
+    "civcore:theology",
+    "civcore:machinery"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:university"
+    ],
+    "units": [],
+    "stages": [
+      "civ_printing_press"
+    ]
+  }
+}

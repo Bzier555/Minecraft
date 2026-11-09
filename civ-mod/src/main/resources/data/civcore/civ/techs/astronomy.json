@@ -1,0 +1,18 @@
+{
+  "id": "civcore:astronomy",
+  "era": "industrial",
+  "cost": 330,
+  "requires": [
+    "civcore:theology",
+    "civcore:optics"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:observatory"
+    ],
+    "units": [],
+    "stages": [
+      "civ_astronomy"
+    ]
+  }
+}

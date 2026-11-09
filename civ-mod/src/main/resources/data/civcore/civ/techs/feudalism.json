@@ -1,0 +1,20 @@
+{
+  "id": "civcore:feudalism",
+  "era": "medieval",
+  "cost": 170,
+  "requires": [
+    "civcore:construction",
+    "civcore:iron_working"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:castle"
+    ],
+    "units": [
+      "civcore:pikemen"
+    ],
+    "stages": [
+      "civ_feudalism"
+    ]
+  }
+}

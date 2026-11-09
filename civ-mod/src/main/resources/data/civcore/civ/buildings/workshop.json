@@ -1,0 +1,8 @@
+{
+  "id": "civcore:workshop",
+  "cost": 120,
+  "requiresTech": "civcore:machinery",
+  "yields": {
+    "production": 2
+  }
+}

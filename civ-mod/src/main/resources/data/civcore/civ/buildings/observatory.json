@@ -1,0 +1,8 @@
+{
+  "id": "civcore:observatory",
+  "cost": 180,
+  "requiresTech": "civcore:astronomy",
+  "yields": {
+    "science": 2
+  }
+}

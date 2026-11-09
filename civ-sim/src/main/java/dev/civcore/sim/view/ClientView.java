@@ -38,6 +38,15 @@ public final class ClientView {
     public int researchProgress;
     public int gold;
     public int culture;
+    public String government;
+    public List<String> policies = new ArrayList<>();
+    public int policySlots, policyCost, freeCulture, upkeep;
+    public long anarchyTurns;
+    public List<String> governments = new ArrayList<>(); // available
+    public List<String> allPolicies = new ArrayList<>();
+    public java.util.Map<String, String> policyText = new java.util.TreeMap<>();
+    public List<String> victoryTypes = new ArrayList<>();
+    public int scienceProjects, cultureTarget;
     public int winnerCivId = -1;
     public String victoryType = "";
 

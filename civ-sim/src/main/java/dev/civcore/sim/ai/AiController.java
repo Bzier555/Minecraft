@@ -67,6 +67,7 @@ public final class AiController {
         if (civ.eliminated || s.finished()) return out;
         String me = issuer(civ);
         research(s, r, civ, me, p, out);
+        civics(s, civ, me, p, out);
         diplomacy(s, r, civ, me, p, out);
         production(s, r, civ, me, p, out);
         settlers(s, r, civ, me, out);
@@ -76,6 +77,21 @@ public final class AiController {
             if (c instanceof Command.ProposePeace pp && s.peaceOffers.contains(pp.targetCivId() + ">" + civ.id)) peaceNow.add(pp.targetCivId());
         }
         armies(s, r, civ, me, p, out, peaceNow);
+        return out;
+    }
+
+    /**
+     * Offline governor (F4.5): keeps an absent human civ's cities working (research, production, settling) without
+     * declaring war, making peace, changing civics or moving armies.
+     */
+    public static List<Command> governor(GameState s, Ruleset r, Civilization civ) {
+        List<Command> out = new ArrayList<>();
+        if (civ.eliminated || s.finished()) return out;
+        String me = civ.members.isEmpty() ? issuer(civ) : civ.members.get(0);
+        Personality p = new Personality(0.8, 4, Integer.MAX_VALUE, 3);
+        research(s, r, civ, me, p, out);
+        production(s, r, civ, me, p, out);
+        settlers(s, r, civ, me, out);
         return out;
     }
 
@@ -110,9 +126,14 @@ public final class AiController {
         return sum;
     }
 
+    /** The AI only acts on cities it has seen (fog of war, F4.3). */
+    static boolean knows(GameState s, Civilization civ, City c) {
+        return c.civId == civ.id || dev.civcore.sim.view.Visibility.explored(s, civ.id, c.tile());
+    }
+
     static Optional<City> nearestEnemyCity(GameState s, Civilization civ, TilePos from, boolean requireWar) {
         return s.cities.values().stream()
-            .filter(c -> c.civId != civ.id && (!requireWar || s.atWar(civ.id, c.civId)))
+            .filter(c -> c.civId != civ.id && (!requireWar || s.atWar(civ.id, c.civId)) && knows(s, civ, c))
             .min(Comparator.<City>comparingDouble(c -> s.topology().distance(from, c.tile())).thenComparingLong(c -> c.id));
     }
 
@@ -212,11 +233,16 @@ public final class AiController {
             if (t.kind == dev.civcore.sim.worldplan.ResourceType.Kind.STRATEGIC) free.put(t, dev.civcore.sim.rules.Resources.available(s, r, civ, t));
         }
 
+        boolean needScout = s.turn < 120 && !hasScout(s, civ) && !queued(s, civ, "civcore:scout") && exploredShare(s, civ) < 0.35;
+        java.util.Set<String> nationalPicked = new java.util.HashSet<>();
         for (City c : s.cities.values()) {
             if (c.civId != civ.id || !c.productionQueue.isEmpty()) continue;
             Optional<UnitDef> unit = bestMilitaryUnit(r, civ, free);
             String pick = null;
-            if (unit.isPresent() && (threatened(s, c) || garrisonUnits(s, c) == 0)) {
+            if (needScout && c.id == civ.capitalCityId && garrisonUnits(s, c) > 0) {
+                pick = "civcore:scout";
+                needScout = false;
+            } else if (unit.isPresent() && (threatened(s, c) || garrisonUnits(s, c) == 0)) {
                 pick = unit.get().id();
             } else if (cities + settlersPending < p.targetCities() && c.population >= 2 && settlersPending == 0 && happiness > 0) {
                 pick = Military.SETTLERS;
@@ -225,7 +251,8 @@ public final class AiController {
                 pick = unit.get().id();
                 militaryUnits++;
             } else {
-                pick = bestBuilding(r, civ, c, atWar, happiness).map(BuildingDef::id).orElse(unit.map(UnitDef::id).orElse(null));
+                pick = bestBuilding(s, r, civ, c, atWar, happiness, nationalPicked).map(BuildingDef::id).orElse(unit.map(UnitDef::id).orElse(null));
+                if (pick != null && r.buildings().containsKey(pick) && r.buildings().get(pick).yields().getOrDefault("national", 0) > 0) nationalPicked.add(pick);
             }
             if (pick != null) {
                 if (unit.isPresent() && pick.equals(unit.get().id())) reserve(unit.get(), free);
@@ -234,9 +261,16 @@ public final class AiController {
         }
     }
 
-    static Optional<BuildingDef> bestBuilding(Ruleset r, Civilization civ, City c, boolean atWar, int happiness) {
+    static Optional<BuildingDef> bestBuilding(GameState s, Ruleset r, Civilization civ, City c, boolean atWar, int happiness, java.util.Set<String> nationalPicked) {
+        int projectsDone = dev.civcore.sim.rules.Victory.scienceProjectsBuilt(s, r, civ);
         return r.buildings().values().stream()
             .filter(b -> !c.buildings.contains(b.id()) && available(civ, b.requiresTech()) && !b.id().equals("civcore:palace"))
+            .filter(b -> {
+                if (b.yields().getOrDefault("national", 0) == 0) return true;
+                if (nationalPicked.contains(b.id())) return false;
+                boolean anywhere = s.cities.values().stream().anyMatch(x -> x.civId == civ.id && (x.buildings.contains(b.id()) || x.productionQueue.contains(b.id())));
+                return !anywhere && b.yields().getOrDefault("science_project", 0) == projectsDone + 1;
+            })
             .max(Comparator.<BuildingDef>comparingDouble(b -> buildingValue(b, atWar, happiness)).thenComparing(BuildingDef::id));
     }
 
@@ -244,7 +278,8 @@ public final class AiController {
         var y = b.yields();
         double v = 3.0 * y.getOrDefault("food", 0) + 2.0 * y.getOrDefault("production", 0) + 2.0 * y.getOrDefault("science", 0)
             + 1.5 * y.getOrDefault("gold", 0) + 1.0 * y.getOrDefault("culture", 0) + (atWar ? 1.0 : 0.2) * y.getOrDefault("defense", 0)
-            + (happiness < 2 ? 3.0 : 0.5) * y.getOrDefault("happiness", 0);
+            + (happiness < 2 ? 3.0 : 0.5) * y.getOrDefault("happiness", 0)
+            + 6.0 * y.getOrDefault("science_project", 0);
         return v * 40.0 / b.cost();
     }
 
@@ -342,6 +377,84 @@ public final class AiController {
         return a.tile().equals(goal) || !Military.findPath(s, a.civId, a.tile(), goal).isEmpty();
     }
 
+    static boolean hasScout(GameState s, Civilization civ) {
+        return s.armies.values().stream().anyMatch(a -> a.civId == civ.id && a.hasUnit("civcore:scout"));
+    }
+
+    static boolean queued(GameState s, Civilization civ, String item) {
+        return s.cities.values().stream().anyMatch(c -> c.civId == civ.id && c.productionQueue.contains(item));
+    }
+
+    static double exploredShare(GameState s, Civilization civ) {
+        boolean[] e = s.explored.get(civ.id);
+        if (e == null) return 0;
+        int n = 0;
+        for (boolean b : e) if (b) n++;
+        return n / (double) e.length;
+    }
+
+    /** Send a scout to the nearest unexplored land tile it can reach. */
+    static void explore(GameState s, Civilization civ, Army a, String me, List<Command> out) {
+        java.util.ArrayDeque<TilePos> q = new java.util.ArrayDeque<>();
+        java.util.Set<TilePos> seen = new java.util.HashSet<>();
+        q.add(a.tile());
+        seen.add(a.tile());
+        while (!q.isEmpty() && seen.size() < 2000) {
+            TilePos c = q.poll();
+            for (TilePos n : s.topology().neighbors(c)) {
+                if (!seen.add(n) || !Military.enterable(s, civ.id, n)) continue;
+                if (!dev.civcore.sim.view.Visibility.explored(s, civ.id, n)) {
+                    out.add(new Command.MoveArmy(me, a.id, n.x(), n.z()));
+                    return;
+                }
+                q.add(n);
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ governments and policies
+
+    static final List<dev.civcore.sim.rules.Civics.Government> WAR_GOVS = List.of(
+        dev.civcore.sim.rules.Civics.Government.DESPOTISM, dev.civcore.sim.rules.Civics.Government.MONARCHY,
+        dev.civcore.sim.rules.Civics.Government.THEOCRACY, dev.civcore.sim.rules.Civics.Government.CONSTITUTIONAL_MONARCHY);
+    static final List<dev.civcore.sim.rules.Civics.Government> PEACE_GOVS = List.of(
+        dev.civcore.sim.rules.Civics.Government.DESPOTISM, dev.civcore.sim.rules.Civics.Government.MONARCHY,
+        dev.civcore.sim.rules.Civics.Government.REPUBLIC, dev.civcore.sim.rules.Civics.Government.MERCHANT_REPUBLIC,
+        dev.civcore.sim.rules.Civics.Government.CONSTITUTIONAL_MONARCHY);
+    static final List<dev.civcore.sim.rules.Civics.Policy> WAR_POLICIES = List.of(
+        dev.civcore.sim.rules.Civics.Policy.MILITARY_TRADITION, dev.civcore.sim.rules.Civics.Policy.PROFESSIONAL_ARMY,
+        dev.civcore.sim.rules.Civics.Policy.WORK_ETHIC, dev.civcore.sim.rules.Civics.Policy.CIVIC_PRIDE,
+        dev.civcore.sim.rules.Civics.Policy.AGRARIAN_REFORM, dev.civcore.sim.rules.Civics.Policy.TRADE_GUILDS);
+    static final List<dev.civcore.sim.rules.Civics.Policy> PEACE_POLICIES = List.of(
+        dev.civcore.sim.rules.Civics.Policy.AGRARIAN_REFORM, dev.civcore.sim.rules.Civics.Policy.SCHOLASTICISM,
+        dev.civcore.sim.rules.Civics.Policy.CIVIC_PRIDE, dev.civcore.sim.rules.Civics.Policy.TRADE_GUILDS,
+        dev.civcore.sim.rules.Civics.Policy.MONUMENTAL_ARCHITECTURE, dev.civcore.sim.rules.Civics.Policy.WORK_ETHIC);
+
+    static void civics(GameState s, Civilization civ, String me, Personality p, List<Command> out) {
+        boolean warlike = p.aggression() >= 1.1;
+        var prefs = warlike ? WAR_GOVS : PEACE_GOVS;
+        var current = dev.civcore.sim.rules.Civics.government(civ);
+        int currentRank = prefs.indexOf(current);
+        boolean atWar = s.civs.values().stream().anyMatch(o -> s.atWar(civ.id, o.id));
+        if (!atWar && civ.anarchyUntilTurn <= s.turn) {
+            for (int i = prefs.size() - 1; i > currentRank; i--) {
+                if (dev.civcore.sim.rules.Civics.available(civ, prefs.get(i))) {
+                    out.add(new Command.ChangeGovernment(me, prefs.get(i).name()));
+                    return; // policies may be trimmed by the change; adopt next turn
+                }
+            }
+        }
+        int slots = current.policySlots;
+        if (civ.policies.size() < slots && dev.civcore.sim.rules.Civics.freeCulture(civ) >= dev.civcore.sim.rules.Civics.policyCost(civ)) {
+            for (var pol : warlike ? WAR_POLICIES : PEACE_POLICIES) {
+                if (!civ.policies.contains(pol.name())) {
+                    out.add(new Command.AdoptPolicy(me, pol.name()));
+                    return;
+                }
+            }
+        }
+    }
+
     /** Enemy army strength on a city's tile plus the city's own defence. */
     static double targetDefence(GameState s, Ruleset r, City c) {
         double d = Military.cityStrength(s, c, r);
@@ -354,7 +467,7 @@ public final class AiController {
         City best = null;
         double bestCost = Double.MAX_VALUE;
         for (City c : s.cities.values()) {
-            if (!s.atWar(civ.id, c.civId) || peaceNow.contains(c.civId)) continue;
+            if (!s.atWar(civ.id, c.civId) || peaceNow.contains(c.civId) || !knows(s, civ, c)) continue;
             double cost = targetDefence(s, r, c) + 2.0 * s.topology().distance(a.tile(), c.tile());
             if (cost < bestCost && !Military.findPath(s, civ.id, a.tile(), c.tile()).isEmpty()) {
                 bestCost = cost;
@@ -370,6 +483,10 @@ public final class AiController {
         boolean atWar = s.civs.values().stream().anyMatch(o -> s.atWar(civ.id, o.id) && !peaceNow.contains(o.id));
         for (Army a : List.copyOf(s.armies.values())) {
             if (a.civId != civ.id || a.hasUnit(Military.SETTLERS) || !a.path.isEmpty()) continue;
+            if (a.units.stream().allMatch(u -> u.type.equals("civcore:scout"))) {
+                explore(s, civ, a, me, out);
+                continue;
+            }
             Optional<City> onCity = myCities.stream().filter(c -> c.tile().equals(a.tile())).findFirst();
             // Defend: a threatened city nearby pulls idle armies home.
             Optional<City> threatened = myCities.stream().filter(c -> threatened(s, c))

@@ -1,0 +1,8 @@
+{
+  "id": "civcore:knights",
+  "cost": 120,
+  "strength": 20,
+  "moves": 4,
+  "requiresTech": "civcore:chivalry",
+  "requiresResource": "civcore:horses"
+}

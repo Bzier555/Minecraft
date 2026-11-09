@@ -45,6 +45,8 @@ public final class ViewBuilder {
         v.analysed = s.map.analysed;
         v.myCivId = viewerCivId;
         v.winnerCivId = s.winnerCivId;
+        v.victoryTypes.addAll(s.victoryTypes);
+        v.cultureTarget = dev.civcore.sim.rules.Victory.cultureTarget(s);
         v.victoryType = s.victoryType;
 
         int n = s.map.width * s.map.height;
@@ -140,6 +142,20 @@ public final class ViewBuilder {
             v.researchProgress = me.researchProgress;
             v.gold = me.gold;
             v.culture = me.culture;
+            var mods = dev.civcore.sim.rules.Civics.modifiers(s, me);
+            v.government = dev.civcore.sim.rules.Civics.government(me).name();
+            v.policies.addAll(me.policies);
+            v.policySlots = dev.civcore.sim.rules.Civics.government(me).policySlots;
+            v.policyCost = dev.civcore.sim.rules.Civics.policyCost(me);
+            v.freeCulture = dev.civcore.sim.rules.Civics.freeCulture(me);
+            v.upkeep = dev.civcore.sim.rules.Economy.upkeep(s, me, mods);
+            v.anarchyTurns = Math.max(0, me.anarchyUntilTurn - s.turn);
+            for (var gv : dev.civcore.sim.rules.Civics.Government.values()) if (dev.civcore.sim.rules.Civics.available(me, gv)) v.governments.add(gv.name());
+            for (var pol : dev.civcore.sim.rules.Civics.Policy.values()) {
+                v.allPolicies.add(pol.name());
+                v.policyText.put(pol.name(), pol.description);
+            }
+            v.scienceProjects = dev.civcore.sim.rules.Victory.scienceProjectsBuilt(s, r, me);
             v.happiness = dev.civcore.sim.rules.Resources.happiness(s, r, me);
             var owned = dev.civcore.sim.rules.Resources.owned(s, me);
             for (var t : dev.civcore.sim.worldplan.ResourceType.values()) {

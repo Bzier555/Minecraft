@@ -59,6 +59,8 @@ public final class Simulation {
             case ProposePeace p -> proposePeace(s, p);
             case SettleWithArmy sw -> settleWithArmy(s, r, sw);
             case dev.civcore.sim.command.Command.DequeueProduction d -> dequeue(s, d);
+            case dev.civcore.sim.command.Command.ChangeGovernment cg -> changeGovernment(s, cg);
+            case dev.civcore.sim.command.Command.AdoptPolicy ap -> adoptPolicy(s, ap);
         };
     }
 
@@ -217,6 +219,43 @@ public final class Simulation {
         return CommandResult.ok("Researching " + tech.id() + " (" + tech.cost() + " science).");
     }
 
+    static CommandResult changeGovernment(GameState s, dev.civcore.sim.command.Command.ChangeGovernment c) {
+        Optional<Civilization> civ = s.civOfMember(c.issuer());
+        if (civ.isEmpty()) return CommandResult.fail("You don't have a civilization.");
+        dev.civcore.sim.rules.Civics.Government g;
+        try {
+            g = dev.civcore.sim.rules.Civics.Government.valueOf(c.government());
+        } catch (IllegalArgumentException e) {
+            return CommandResult.fail("Unknown government " + c.government() + ".");
+        }
+        Civilization v = civ.get();
+        if (!dev.civcore.sim.rules.Civics.available(v, g)) return CommandResult.fail("Requires " + g.requiresTech + ".");
+        if (g == dev.civcore.sim.rules.Civics.government(v)) return CommandResult.fail("Already your government.");
+        v.government = g.name();
+        v.anarchyUntilTurn = s.turn + dev.civcore.sim.rules.Civics.ANARCHY_TURNS;
+        while (v.policies.size() > g.policySlots) v.policies.remove(v.policies.size() - 1);
+        return CommandResult.ok(v.name + " adopts " + g.name().toLowerCase().replace('_', ' ') + " (" + dev.civcore.sim.rules.Civics.ANARCHY_TURNS + " turns of anarchy).");
+    }
+
+    static CommandResult adoptPolicy(GameState s, dev.civcore.sim.command.Command.AdoptPolicy c) {
+        Optional<Civilization> civ = s.civOfMember(c.issuer());
+        if (civ.isEmpty()) return CommandResult.fail("You don't have a civilization.");
+        Civilization v = civ.get();
+        try {
+            dev.civcore.sim.rules.Civics.Policy.valueOf(c.policy());
+        } catch (IllegalArgumentException e) {
+            return CommandResult.fail("Unknown policy " + c.policy() + ".");
+        }
+        if (v.policies.contains(c.policy())) return CommandResult.fail("Already adopted.");
+        int slots = dev.civcore.sim.rules.Civics.government(v).policySlots;
+        if (v.policies.size() >= slots) return CommandResult.fail("No free policy slot (" + slots + " under your government).");
+        int cost = dev.civcore.sim.rules.Civics.policyCost(v);
+        if (dev.civcore.sim.rules.Civics.freeCulture(v) < cost) return CommandResult.fail("Needs " + cost + " culture (you have " + dev.civcore.sim.rules.Civics.freeCulture(v) + ").");
+        v.cultureSpent += cost;
+        v.policies.add(c.policy());
+        return CommandResult.ok(v.name + " adopts the policy " + c.policy().toLowerCase().replace('_', ' ') + ".");
+    }
+
     static CommandResult dequeue(GameState s, dev.civcore.sim.command.Command.DequeueProduction d) {
         Optional<Civilization> civ = s.civOfMember(d.issuer());
         City city = s.cities.get(d.cityId());
@@ -248,6 +287,14 @@ public final class Simulation {
         if (b != null && (city.buildings.contains(b.id()) || city.productionQueue.contains(b.id()))) {
             return CommandResult.fail(city.name + " already has or is building " + b.id() + ".");
         }
+        if (b != null && b.yields().getOrDefault("national", 0) > 0) {
+            boolean anywhere = s.cities.values().stream().anyMatch(x -> x.civId == v.id && (x.buildings.contains(b.id()) || x.productionQueue.contains(b.id())));
+            if (anywhere) return CommandResult.fail(b.id() + " is a national project: only one per civilization.");
+            int order = b.yields().getOrDefault("science_project", 0);
+            if (order > 1 && dev.civcore.sim.rules.Victory.scienceProjectsBuilt(s, r, v) < order - 1) {
+                return CommandResult.fail("Complete the previous science project first.");
+            }
+        }
         city.productionQueue.add(q.itemId());
         return CommandResult.ok(city.name + " will build " + q.itemId() + ".");
     }
@@ -265,6 +312,7 @@ public final class Simulation {
             int gold = 0;
             int happiness = dev.civcore.sim.rules.Resources.happiness(s, r, civ);
             civ.happiness = happiness;
+            dev.civcore.sim.rules.Civics.Modifiers mods = dev.civcore.sim.rules.Civics.modifiers(s, civ);
             for (long cityId : civ.cityIds) {
                 City city = s.cities.get(cityId);
                 if (city == null || city.civId != civ.id) continue;
@@ -272,17 +320,20 @@ public final class Simulation {
                 TileYields.Yield tiles = TileYields.city(s, city);
                 science += city.population + y.getOrDefault("science", 0);
                 gold += tiles.gold() + y.getOrDefault("gold", 0);
-                growCity(city, tiles.food() + y.getOrDefault("food", 0), happiness, events);
-                int production = tiles.production() + y.getOrDefault("production", 0);
+                growCity(city, tiles.food() + y.getOrDefault("food", 0) + mods.foodPerCity(), happiness, events);
+                int production = dev.civcore.sim.rules.Civics.applyPct(tiles.production() + y.getOrDefault("production", 0), mods.productionPct());
                 if (happiness <= dev.civcore.sim.rules.Resources.VERY_UNHAPPY) production = production * 2 / 3;
                 produce(s, city, r, production, events);
             }
-            civ.gold += gold;
-            research(civ, r, science, events);
+            gold += dev.civcore.sim.rules.Economy.connectionGold(s, civ);
+            gold = dev.civcore.sim.rules.Civics.applyPct(gold, mods.goldPct());
+            civ.gold += gold - dev.civcore.sim.rules.Economy.upkeep(s, civ, mods);
+            dev.civcore.sim.rules.Economy.disbandIfBankrupt(s, r, civ, events);
+            research(civ, r, dev.civcore.sim.rules.Civics.applyPct(science, mods.sciencePct()), events);
         }
         dev.civcore.sim.rules.Culture.step(s, r, events);
         Military.step(s, r, events);
-        Victory.check(s, events);
+        Victory.check(s, r, events);
         dev.civcore.sim.view.Visibility.update(s, java.util.Map.of());
         return events;
     }

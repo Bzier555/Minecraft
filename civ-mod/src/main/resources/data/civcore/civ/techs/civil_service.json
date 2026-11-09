@@ -1,0 +1,16 @@
+{
+  "id": "civcore:civil_service",
+  "era": "medieval",
+  "cost": 180,
+  "requires": [
+    "civcore:philosophy",
+    "civcore:currency"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_civil_service"
+    ]
+  }
+}

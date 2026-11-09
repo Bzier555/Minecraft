@@ -1,0 +1,15 @@
+{
+  "id": "civcore:iron_working",
+  "era": "medieval",
+  "cost": 110,
+  "requires": [
+    "civcore:bronze_working"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_iron_working"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "civcore:chivalry",
+  "era": "medieval",
+  "cost": 220,
+  "requires": [
+    "civcore:horseback_riding",
+    "civcore:feudalism"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:knights"
+    ],
+    "stages": [
+      "civ_chivalry"
+    ]
+  }
+}

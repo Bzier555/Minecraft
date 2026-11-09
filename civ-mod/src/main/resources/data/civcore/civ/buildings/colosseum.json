@@ -1,0 +1,8 @@
+{
+  "id": "civcore:colosseum",
+  "cost": 110,
+  "requiresTech": "civcore:construction",
+  "yields": {
+    "happiness": 3
+  }
+}

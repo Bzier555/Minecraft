@@ -1,0 +1,8 @@
+{
+  "id": "civcore:public_school",
+  "cost": 240,
+  "requiresTech": "civcore:scientific_theory",
+  "yields": {
+    "science": 3
+  }
+}

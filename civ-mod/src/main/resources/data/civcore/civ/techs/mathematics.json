@@ -1,0 +1,16 @@
+{
+  "id": "civcore:mathematics",
+  "era": "medieval",
+  "cost": 120,
+  "requires": [
+    "civcore:writing",
+    "civcore:the_wheel"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_mathematics"
+    ]
+  }
+}

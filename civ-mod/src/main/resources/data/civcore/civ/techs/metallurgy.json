@@ -1,0 +1,17 @@
+{
+  "id": "civcore:metallurgy",
+  "era": "industrial",
+  "cost": 360,
+  "requires": [
+    "civcore:gunpowder"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:cannon"
+    ],
+    "stages": [
+      "civ_metallurgy"
+    ]
+  }
+}

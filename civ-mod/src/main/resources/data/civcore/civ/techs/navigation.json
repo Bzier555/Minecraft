@@ -1,0 +1,16 @@
+{
+  "id": "civcore:navigation",
+  "era": "industrial",
+  "cost": 340,
+  "requires": [
+    "civcore:optics",
+    "civcore:astronomy"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [],
+    "stages": [
+      "civ_navigation"
+    ]
+  }
+}

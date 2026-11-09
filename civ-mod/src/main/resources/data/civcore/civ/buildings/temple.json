@@ -1,0 +1,9 @@
+{
+  "id": "civcore:temple",
+  "cost": 80,
+  "requiresTech": "civcore:philosophy",
+  "yields": {
+    "culture": 2,
+    "happiness": 1
+  }
+}

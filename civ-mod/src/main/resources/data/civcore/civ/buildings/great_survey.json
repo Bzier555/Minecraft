@@ -1,0 +1,9 @@
+{
+  "id": "civcore:great_survey",
+  "cost": 400,
+  "requiresTech": "civcore:economics",
+  "yields": {
+    "national": 1,
+    "science_project": 1
+  }
+}

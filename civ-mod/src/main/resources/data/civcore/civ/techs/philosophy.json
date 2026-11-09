@@ -1,0 +1,18 @@
+{
+  "id": "civcore:philosophy",
+  "era": "medieval",
+  "cost": 130,
+  "requires": [
+    "civcore:writing",
+    "civcore:calendar"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:temple"
+    ],
+    "units": [],
+    "stages": [
+      "civ_philosophy"
+    ]
+  }
+}

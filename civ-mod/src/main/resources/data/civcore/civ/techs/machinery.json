@@ -1,0 +1,20 @@
+{
+  "id": "civcore:machinery",
+  "era": "medieval",
+  "cost": 200,
+  "requires": [
+    "civcore:engineering",
+    "civcore:iron_working"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:workshop"
+    ],
+    "units": [
+      "civcore:crossbowmen"
+    ],
+    "stages": [
+      "civ_machinery"
+    ]
+  }
+}

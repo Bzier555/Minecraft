@@ -87,7 +87,8 @@ public final class Resources {
                 if (d != null) fromBuildings += d.yields().getOrDefault("happiness", 0);
             }
         }
-        return BASE_HAPPINESS + HAPPINESS_PER_LUXURY * luxuries(s, c) + fromBuildings - UNHAPPINESS_PER_CITY * cities - pop / 2;
+        return BASE_HAPPINESS + HAPPINESS_PER_LUXURY * luxuries(s, c) + fromBuildings - UNHAPPINESS_PER_CITY * cities - pop / 2
+            + Civics.modifiers(s, c).happiness();
     }
 
     /** Tile index helper for tests and views. */

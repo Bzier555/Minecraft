@@ -218,7 +218,19 @@ public final class ServerGame {
     /** Runs one strategic tick now and announces its events. */
     public void step() {
         if (state == null) return;
-        for (String rejected : dev.civcore.sim.ai.AiTurn.run(state, RulesetReloadListener.current())) {
+        java.util.Set<Integer> governed = new java.util.HashSet<>();
+        for (var civ : state.civs.values()) {
+            if ("ai".equals(civ.controller)) continue;
+            boolean online = civ.members.stream().anyMatch(m -> {
+                try {
+                    return server.getPlayerList().getPlayer(java.util.UUID.fromString(m)) != null;
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            });
+            if (!online) governed.add(civ.id);
+        }
+        for (String rejected : dev.civcore.sim.ai.AiTurn.run(state, RulesetReloadListener.current(), governed)) {
             CivCoreMod.LOG.debug("AI command rejected: {}", rejected);
         }
         List<String> events = Simulation.strategicStep(state, RulesetReloadListener.current());

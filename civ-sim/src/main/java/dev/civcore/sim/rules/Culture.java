@@ -40,7 +40,8 @@ public final class Culture {
     /** Runs one turn of culture for every city. */
     public static void step(GameState s, Ruleset r, List<String> events) {
         for (City c : s.cities.values()) {
-            int gained = cityCulture(c, r);
+            Civilization owner = s.civs.get(c.civId);
+            int gained = owner == null ? cityCulture(c, r) : Civics.applyPct(cityCulture(c, r), Civics.modifiers(s, owner).culturePct());
             c.cultureStored += gained;
             Civilization civ = s.civs.get(c.civId);
             if (civ != null) civ.culture += gained;

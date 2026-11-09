@@ -1,0 +1,18 @@
+{
+  "id": "civcore:scientific_theory",
+  "era": "industrial",
+  "cost": 420,
+  "requires": [
+    "civcore:astronomy",
+    "civcore:printing_press"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:public_school"
+    ],
+    "units": [],
+    "stages": [
+      "civ_scientific_theory"
+    ]
+  }
+}

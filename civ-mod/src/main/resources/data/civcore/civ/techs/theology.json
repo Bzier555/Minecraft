@@ -1,0 +1,18 @@
+{
+  "id": "civcore:theology",
+  "era": "medieval",
+  "cost": 190,
+  "requires": [
+    "civcore:philosophy",
+    "civcore:calendar"
+  ],
+  "unlocks": {
+    "buildings": [
+      "civcore:cathedral"
+    ],
+    "units": [],
+    "stages": [
+      "civ_theology"
+    ]
+  }
+}

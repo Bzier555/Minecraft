@@ -40,6 +40,7 @@ unzip -o -j ~/civ-spike-server/mods/exotic_worlds-1.3.3+mc1.21.1.jar "META-INF/j
 | I | [Testing strategy](docs/I-testing.md) | How to test compatibility, worldgen, AI, save/load, performance |
 | J | [Implementation guide](docs/J-implementation-guide.md) | Step-by-step tasks for a coding agent to start milestone 1 |
 | — | [Platform spike report](docs/spike-platform.md) · [Client test plan](docs/client-test-plan.md) | Phase 0 evidence for the NeoForge 1.21.1 decision |
+| — | [**Play-test checklist**](docs/playtest-checklist.md) | What to try in-game now |
 
 ## Executive summary
 

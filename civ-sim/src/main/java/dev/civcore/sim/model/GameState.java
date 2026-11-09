@@ -36,6 +36,12 @@ public final class GameState {
     /** Winner once the game is over, else -1. */
     public int winnerCivId = -1;
     public String victoryType = "";
+    /** Victory types in play: domination, science, culture, score. */
+    public java.util.Set<String> victoryTypes = new java.util.TreeSet<>(java.util.List.of("domination", "science", "culture", "score"));
+    /** Culture needed for a culture victory; 0 = automatic (scaled by map size). */
+    public int cultureVictoryCulture;
+    /** Human civs with no member online have their cities run by the AI governor (no war decisions). */
+    public boolean offlineGovernor = true;
     public StrategicMap map;
 
     private transient Topology topology;

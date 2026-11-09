@@ -5,7 +5,8 @@ package dev.civcore.sim.command;
  * {@code issuer} is a player UUID string, or "ai:&lt;civId&gt;" for AI controllers.
  */
 public sealed interface Command permits Command.FoundCity, Command.SetResearch, Command.QueueProduction,
-    Command.MoveArmy, Command.DeclareWar, Command.ProposePeace, Command.SettleWithArmy, Command.DequeueProduction {
+    Command.MoveArmy, Command.DeclareWar, Command.ProposePeace, Command.SettleWithArmy, Command.DequeueProduction,
+    Command.ChangeGovernment, Command.AdoptPolicy {
 
     String issuer();
 
@@ -20,6 +21,14 @@ public sealed interface Command permits Command.FoundCity, Command.SetResearch, 
 
     /** Append a building or unit id to a city's production queue. */
     record QueueProduction(String issuer, long cityId, String itemId) implements Command {
+    }
+
+    /** Switch government (Civics.Government name); causes a short anarchy. */
+    record ChangeGovernment(String issuer, String government) implements Command {
+    }
+
+    /** Spend culture on a policy (Civics.Policy name). */
+    record AdoptPolicy(String issuer, String policy) implements Command {
     }
 
     /** Remove the item at {@code index} from a city's production queue (stored production carries over). */

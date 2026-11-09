@@ -42,6 +42,7 @@ public final class ClientCivState {
         switch (screen) {
             case "city" -> mc.setScreen(new CityScreen(id, null));
             case "tech" -> mc.setScreen(new TechScreen(null));
+            case "civics" -> mc.setScreen(new CivicsScreen(null));
             default -> mc.setScreen(new StrategicMapScreen());
         }
     }

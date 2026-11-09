@@ -1,0 +1,18 @@
+{
+  "id": "civcore:horseback_riding",
+  "era": "medieval",
+  "cost": 110,
+  "requires": [
+    "civcore:animal_husbandry",
+    "civcore:the_wheel"
+  ],
+  "unlocks": {
+    "buildings": [],
+    "units": [
+      "civcore:horsemen"
+    ],
+    "stages": [
+      "civ_horseback_riding"
+    ]
+  }
+}
