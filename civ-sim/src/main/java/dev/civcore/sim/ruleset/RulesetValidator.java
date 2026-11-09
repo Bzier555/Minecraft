@@ -39,6 +39,9 @@ public final class RulesetValidator {
             if (u.requiresTech() != null && !r.techs().containsKey(u.requiresTech())) {
                 errors.add("unit " + u.id() + ": requires unknown tech " + u.requiresTech());
             }
+            if (u.requiresResource() != null && dev.civcore.sim.worldplan.ResourceType.byId(u.requiresResource()) == null) {
+                errors.add("unit " + u.id() + ": requires unknown resource " + u.requiresResource());
+            }
         }
         findCycle(r).ifPresent(cycle -> errors.add("tech prerequisites contain a cycle: " + String.join(" -> ", cycle)));
         return errors;

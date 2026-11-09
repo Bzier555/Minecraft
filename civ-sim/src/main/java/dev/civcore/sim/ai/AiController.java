@@ -168,10 +168,22 @@ public final class AiController {
         return requiresTech == null || civ.knownTechs.contains(requiresTech);
     }
 
-    static Optional<UnitDef> bestMilitaryUnit(Ruleset r, Civilization civ) {
+    static Optional<UnitDef> bestMilitaryUnit(Ruleset r, Civilization civ, java.util.Map<dev.civcore.sim.worldplan.ResourceType, Integer> freeResources) {
         return r.units().values().stream()
             .filter(u -> u.strength() > 1 && available(civ, u.requiresTech()))
+            .filter(u -> {
+                if (u.requiresResource() == null) return true;
+                var res = dev.civcore.sim.worldplan.ResourceType.byId(u.requiresResource());
+                return res != null && freeResources.getOrDefault(res, 0) > 0;
+            })
             .max(Comparator.<UnitDef>comparingInt(UnitDef::strength).thenComparing(UnitDef::id));
+    }
+
+    /** Takes one unit of the unit's strategic resource from the local budget (several cities pick in one turn). */
+    static void reserve(UnitDef u, java.util.Map<dev.civcore.sim.worldplan.ResourceType, Integer> free) {
+        if (u.requiresResource() == null) return;
+        var res = dev.civcore.sim.worldplan.ResourceType.byId(u.requiresResource());
+        if (res != null) free.merge(res, -1, Integer::sum);
     }
 
     static boolean threatened(GameState s, City c) {
@@ -194,36 +206,45 @@ public final class AiController {
         long militaryUnits = s.armies.values().stream().filter(a -> a.civId == civ.id && !a.hasUnit(Military.SETTLERS))
             .mapToLong(a -> a.units.size()).sum();
         boolean atWar = s.civs.values().stream().anyMatch(o -> s.atWar(civ.id, o.id));
-        Optional<UnitDef> unit = bestMilitaryUnit(r, civ);
+        int happiness = dev.civcore.sim.rules.Resources.happiness(s, r, civ);
+        var free = new java.util.EnumMap<dev.civcore.sim.worldplan.ResourceType, Integer>(dev.civcore.sim.worldplan.ResourceType.class);
+        for (var t : dev.civcore.sim.worldplan.ResourceType.values()) {
+            if (t.kind == dev.civcore.sim.worldplan.ResourceType.Kind.STRATEGIC) free.put(t, dev.civcore.sim.rules.Resources.available(s, r, civ, t));
+        }
 
         for (City c : s.cities.values()) {
             if (c.civId != civ.id || !c.productionQueue.isEmpty()) continue;
+            Optional<UnitDef> unit = bestMilitaryUnit(r, civ, free);
             String pick = null;
             if (unit.isPresent() && (threatened(s, c) || garrisonUnits(s, c) == 0)) {
                 pick = unit.get().id();
-            } else if (cities + settlersPending < p.targetCities() && c.population >= 2 && settlersPending == 0) {
+            } else if (cities + settlersPending < p.targetCities() && c.population >= 2 && settlersPending == 0 && happiness > 0) {
                 pick = Military.SETTLERS;
                 settlersPending++;
             } else if (unit.isPresent() && militaryUnits < (atWar ? 4 : 2) * cities * p.aggression()) {
                 pick = unit.get().id();
                 militaryUnits++;
             } else {
-                pick = bestBuilding(r, civ, c, atWar).map(BuildingDef::id).orElse(unit.map(UnitDef::id).orElse(null));
+                pick = bestBuilding(r, civ, c, atWar, happiness).map(BuildingDef::id).orElse(unit.map(UnitDef::id).orElse(null));
             }
-            if (pick != null) out.add(new Command.QueueProduction(me, c.id, pick));
+            if (pick != null) {
+                if (unit.isPresent() && pick.equals(unit.get().id())) reserve(unit.get(), free);
+                out.add(new Command.QueueProduction(me, c.id, pick));
+            }
         }
     }
 
-    static Optional<BuildingDef> bestBuilding(Ruleset r, Civilization civ, City c, boolean atWar) {
+    static Optional<BuildingDef> bestBuilding(Ruleset r, Civilization civ, City c, boolean atWar, int happiness) {
         return r.buildings().values().stream()
             .filter(b -> !c.buildings.contains(b.id()) && available(civ, b.requiresTech()) && !b.id().equals("civcore:palace"))
-            .max(Comparator.<BuildingDef>comparingDouble(b -> buildingValue(b, atWar)).thenComparing(BuildingDef::id));
+            .max(Comparator.<BuildingDef>comparingDouble(b -> buildingValue(b, atWar, happiness)).thenComparing(BuildingDef::id));
     }
 
-    static double buildingValue(BuildingDef b, boolean atWar) {
+    static double buildingValue(BuildingDef b, boolean atWar, int happiness) {
         var y = b.yields();
         double v = 3.0 * y.getOrDefault("food", 0) + 2.0 * y.getOrDefault("production", 0) + 2.0 * y.getOrDefault("science", 0)
-            + 1.5 * y.getOrDefault("gold", 0) + 1.0 * y.getOrDefault("culture", 0) + (atWar ? 1.0 : 0.2) * y.getOrDefault("defense", 0);
+            + 1.5 * y.getOrDefault("gold", 0) + 1.0 * y.getOrDefault("culture", 0) + (atWar ? 1.0 : 0.2) * y.getOrDefault("defense", 0)
+            + (happiness < 2 ? 3.0 : 0.5) * y.getOrDefault("happiness", 0);
         return v * 40.0 / b.cost();
     }
 
@@ -244,6 +265,8 @@ public final class AiController {
             if (nt != null && !nt.passable) continue;
             TileYields.Yield y = TileYields.of(s, n);
             score += 3 * y.food() + 2 * y.production() + y.gold();
+            var res = s.map.resource(n);
+            if (res != null && res.kind != dev.civcore.sim.worldplan.ResourceType.Kind.BONUS) score += 6;
         }
         return score;
     }

@@ -52,6 +52,7 @@ public final class ViewBuilder {
         Set<TilePos> visible = viewerCivId >= 0 ? Visibility.visibleNow(s, viewerCivId, playerTiles) : Set.of();
         v.terrain = new int[n];
         v.owner = new int[n];
+        v.resource = new int[n];
         v.visible = new boolean[n];
         for (int i = 0; i < n; i++) {
             TilePos p = new TilePos(i % s.map.width, i / s.map.width);
@@ -59,6 +60,10 @@ public final class ViewBuilder {
             v.visible[i] = seeAll || visible.contains(p);
             v.terrain[i] = seen ? s.map.terrain[i] : ClientView.UNEXPLORED;
             v.owner[i] = seen ? s.map.owner[i] : -1;
+            int res = s.map.resource == null ? -1 : s.map.resource[i];
+            boolean known = res >= 0 && (seeAll || me0(s, viewerCivId) == null
+                || dev.civcore.sim.rules.Resources.knows(me0(s, viewerCivId), dev.civcore.sim.worldplan.ResourceType.values()[res]));
+            v.resource[i] = seen && known ? res : -1;
         }
 
         Civilization me = s.civs.get(viewerCivId);
@@ -135,6 +140,14 @@ public final class ViewBuilder {
             v.researchProgress = me.researchProgress;
             v.gold = me.gold;
             v.culture = me.culture;
+            v.happiness = dev.civcore.sim.rules.Resources.happiness(s, r, me);
+            var owned = dev.civcore.sim.rules.Resources.owned(s, me);
+            for (var t : dev.civcore.sim.worldplan.ResourceType.values()) {
+                if (t.kind == dev.civcore.sim.worldplan.ResourceType.Kind.STRATEGIC && dev.civcore.sim.rules.Resources.knows(me, t)) {
+                    v.strategic.put(t.name().toLowerCase(), new int[]{dev.civcore.sim.rules.Resources.available(s, r, me, t), owned.getOrDefault(t, 0)});
+                }
+                if (t.kind == dev.civcore.sim.worldplan.ResourceType.Kind.LUXURY && owned.getOrDefault(t, 0) > 0) v.luxuries.add(t.name().toLowerCase());
+            }
             for (Ruleset.TechDef t : r.techs().values()) {
                 ClientView.TechInfo ti = new ClientView.TechInfo();
                 ti.id = t.id();
@@ -149,6 +162,10 @@ public final class ViewBuilder {
             v.techs.sort((a, b) -> a.cost != b.cost ? Integer.compare(a.cost, b.cost) : a.id.compareTo(b.id));
         }
         return v;
+    }
+
+    private static Civilization me0(GameState s, int civId) {
+        return s.civs.get(civId);
     }
 
     private static void fillOwnCity(GameState s, Ruleset r, Civilization me, City c, ClientView.CityInfo ci) {

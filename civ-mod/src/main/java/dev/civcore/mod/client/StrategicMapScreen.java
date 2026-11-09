@@ -153,6 +153,19 @@ public class StrategicMapScreen extends Screen {
         int color = t == ClientView.UNEXPLORED ? 0xFF000000 : t < 0 ? 0xFF404040 : TERRAIN_COLOR[t];
         if (t != ClientView.UNEXPLORED && !v.visible[i]) color = darken(color);
         g.fill(x0, z0, x1, z1, color);
+        int res = v.resource == null ? -1 : v.resource[i];
+        if (res >= 0 && zoom >= 10) {
+            var rt = dev.civcore.sim.worldplan.ResourceType.values()[res];
+            int rc = switch (rt.kind) {
+                case BONUS -> 0xFFE8E8C0;
+                case STRATEGIC -> 0xFFFF6040;
+                case LUXURY -> 0xFFE070FF;
+            };
+            int cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, rr = Math.max(2, (int) (zoom / 7));
+            g.fill(cx - rr - 1, cz - rr - 1, cx + rr + 1, cz + rr + 1, 0xFF000000);
+            g.fill(cx - rr, cz - rr, cx + rr, cz + rr, rc);
+            if (zoom >= 22) g.drawString(font, rt.name().substring(0, 1), cx - 2, cz - 4, 0xFF000000, false);
+        }
         int owner = v.owner[i];
         if (owner >= 0) {
             ClientView.CivInfo civ = ClientCivState.civ(owner);
@@ -220,6 +233,14 @@ public class StrategicMapScreen extends Screen {
         g.drawString(font, "Gold " + v.gold + " | " + (v.currentResearch == null ? "No research" : ClientCivState.shortId(v.currentResearch)
             + " " + v.researchProgress + "/" + techCost(v, v.currentResearch)), x, y, 0xC0C0C0);
         y += 11;
+        StringBuilder res = new StringBuilder("Happy " + (v.happiness >= 0 ? "+" : "") + v.happiness);
+        if (v.strategic != null) v.strategic.forEach((k, a) -> res.append(" | ").append(ClientCivState.shortId(k)).append(' ').append(a[0]).append('/').append(a[1]));
+        g.drawString(font, res.toString(), x, y, v.happiness < 0 ? 0xFF8080 : 0x80FF80);
+        y += 11;
+        if (v.luxuries != null && !v.luxuries.isEmpty()) {
+            g.drawString(font, "Luxuries: " + String.join(", ", v.luxuries), x, y, 0xE070FF);
+            y += 11;
+        }
         if (v.winnerCivId >= 0) {
             ClientView.CivInfo w = ClientCivState.civ(v.winnerCivId);
             g.drawString(font, (w == null ? "?" : w.name) + " won (" + v.victoryType + ")", x, y, 0xFFD700);
@@ -240,6 +261,8 @@ public class StrategicMapScreen extends Screen {
             if (t != null) {
                 int ter = v.terrain[v.index(t[0], t[1])];
                 String name = ter == ClientView.UNEXPLORED ? "Unexplored" : ter < 0 ? "Unknown" : ClientCivState.shortId(TerrainType.values()[ter].name().toLowerCase());
+                int rr = v.resource == null ? -1 : v.resource[v.index(t[0], t[1])];
+                if (rr >= 0) name += " + " + ClientCivState.shortId(dev.civcore.sim.worldplan.ResourceType.values()[rr].name().toLowerCase());
                 g.drawString(font, "(" + t[0] + "," + t[1] + ") " + name, 4, height - 12, 0xFFFFFF, true);
             }
         }

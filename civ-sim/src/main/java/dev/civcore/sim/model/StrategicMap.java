@@ -17,6 +17,8 @@ public final class StrategicMap {
     /** TerrainType ordinal per tile, or UNKNOWN_TERRAIN until world analysis has run. */
     public int[] terrain;
     public boolean[] river;
+    /** ResourceType ordinal per tile, or -1; null until resources are placed (after analysis). */
+    public int[] resource;
     /** True once every tile has terrain (world analysis finished). */
     public boolean analysed;
 
@@ -68,6 +70,12 @@ public final class StrategicMap {
     public void setTerrain(TilePos p, TerrainType type, boolean hasRiver) {
         terrain[idx(p)] = type.ordinal();
         river[idx(p)] = hasRiver;
+    }
+
+    public dev.civcore.sim.worldplan.ResourceType resource(TilePos p) {
+        if (resource == null) return null;
+        int r = resource[idx(p)];
+        return r < 0 ? null : dev.civcore.sim.worldplan.ResourceType.values()[r];
     }
 
     public boolean river(TilePos p) {

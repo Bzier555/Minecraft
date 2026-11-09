@@ -29,8 +29,14 @@ public final class TileYields {
     public static Yield of(GameState s, TilePos p) {
         TerrainType t = s.map.terrain(p);
         if (t == null) t = TerrainType.PLAINS;
-        int gold = t.gold + (s.map.river(p) ? 1 : 0);
-        return new Yield(t.food, t.production, gold);
+        int food = t.food, prod = t.production, gold = t.gold + (s.map.river(p) ? 1 : 0);
+        dev.civcore.sim.worldplan.ResourceType r = s.map.resource(p);
+        if (r != null) {
+            food += r.food;
+            prod += r.production;
+            gold += r.gold;
+        }
+        return new Yield(food, prod, gold);
     }
 
     /** City centre always yields at least 2 food and 1 production (Civ convention). */

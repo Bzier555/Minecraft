@@ -32,7 +32,8 @@ public final class Ruleset {
         }
     }
 
-    public record UnitDef(String id, int cost, int strength, int moves, String requiresTech) {
+    /** {@code requiresResource}: strategic resource id (e.g. "civcore:iron") each unit uses while it exists, or null. */
+    public record UnitDef(String id, int cost, int strength, int moves, String requiresTech, String requiresResource) {
     }
 
     private final Map<String, TechDef> techs;

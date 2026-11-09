@@ -3,6 +3,7 @@
   "cost": 40,
   "requiresTech": "civcore:calendar",
   "yields": {
-    "culture": 1
+    "culture": 1,
+    "happiness": 2
   }
 }

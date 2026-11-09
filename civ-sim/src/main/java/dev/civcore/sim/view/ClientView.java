@@ -24,6 +24,12 @@ public final class ClientView {
     public int[] owner;
     /** Currently in sight (enemy armies are shown only here). */
     public boolean[] visible;
+    /** ResourceType ordinal, -1 none or not known to the viewer. */
+    public int[] resource;
+    public int happiness;
+    /** Strategic resources: "iron" -> {free, total}. */
+    public java.util.Map<String, int[]> strategic = new java.util.TreeMap<>();
+    public List<String> luxuries = new ArrayList<>();
     public List<CivInfo> civs = new ArrayList<>();
     public List<CityInfo> cities = new ArrayList<>();
     public List<ArmyInfo> armies = new ArrayList<>();

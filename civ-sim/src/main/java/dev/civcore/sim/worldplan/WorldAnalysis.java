@@ -78,6 +78,7 @@ public final class WorldAnalysis {
     public static void finish(GameState state) {
         markCoasts(state.topology(), state.map);
         state.map.analysed = true;
+        ResourcePlacer.place(state);
     }
 
     /** Water tiles next to land become COAST (shallow, workable, where ships will be built). */

@@ -10,7 +10,8 @@
       "civcore:barracks"
     ],
     "units": [
-      "civcore:spearmen"
+      "civcore:spearmen",
+      "civcore:swordsmen"
     ],
     "stages": [
       "civ_bronze_working"

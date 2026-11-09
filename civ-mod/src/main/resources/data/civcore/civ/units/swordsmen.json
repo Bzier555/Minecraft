@@ -1,0 +1,8 @@
+{
+  "id": "civcore:swordsmen",
+  "cost": 60,
+  "strength": 14,
+  "moves": 2,
+  "requiresTech": "civcore:bronze_working",
+  "requiresResource": "civcore:iron"
+}

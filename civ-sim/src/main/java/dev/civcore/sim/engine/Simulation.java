@@ -236,6 +236,15 @@ public final class Simulation {
         if (b == null && u == null) return CommandResult.fail("Unknown building or unit " + q.itemId() + ".");
         String requires = b != null ? b.requiresTech() : u.requiresTech();
         if (requires != null && !v.knownTechs.contains(requires)) return CommandResult.fail("Requires " + requires + ".");
+        if (u != null && u.requiresResource() != null) {
+            var res = dev.civcore.sim.worldplan.ResourceType.byId(u.requiresResource());
+            if (res != null && dev.civcore.sim.rules.Resources.available(s, r, v, res) < 1) {
+                return CommandResult.fail("Needs a free source of " + res.name().toLowerCase() + " inside your borders.");
+            }
+        }
+        if (u != null && u.id().equals(Military.SETTLERS) && dev.civcore.sim.rules.Resources.happiness(s, r, v) <= dev.civcore.sim.rules.Resources.VERY_UNHAPPY) {
+            return CommandResult.fail("Your people are too unhappy to found new cities.");
+        }
         if (b != null && (city.buildings.contains(b.id()) || city.productionQueue.contains(b.id()))) {
             return CommandResult.fail(city.name + " already has or is building " + b.id() + ".");
         }
@@ -254,6 +263,8 @@ public final class Simulation {
         for (Civilization civ : s.civs.values()) {
             int science = 0;
             int gold = 0;
+            int happiness = dev.civcore.sim.rules.Resources.happiness(s, r, civ);
+            civ.happiness = happiness;
             for (long cityId : civ.cityIds) {
                 City city = s.cities.get(cityId);
                 if (city == null || city.civId != civ.id) continue;
@@ -261,8 +272,10 @@ public final class Simulation {
                 TileYields.Yield tiles = TileYields.city(s, city);
                 science += city.population + y.getOrDefault("science", 0);
                 gold += tiles.gold() + y.getOrDefault("gold", 0);
-                growCity(city, tiles.food() + y.getOrDefault("food", 0), events);
-                produce(s, city, r, tiles.production() + y.getOrDefault("production", 0), events);
+                growCity(city, tiles.food() + y.getOrDefault("food", 0), happiness, events);
+                int production = tiles.production() + y.getOrDefault("production", 0);
+                if (happiness <= dev.civcore.sim.rules.Resources.VERY_UNHAPPY) production = production * 2 / 3;
+                produce(s, city, r, production, events);
             }
             civ.gold += gold;
             research(civ, r, science, events);
@@ -291,8 +304,10 @@ public final class Simulation {
     /** Each citizen eats 2 food; the surplus accumulates toward growth, a deficit starves the city. */
     public static final int FOOD_PER_CITIZEN = 2;
 
-    private static void growCity(City city, int food, List<String> events) {
-        city.foodStored += food - FOOD_PER_CITIZEN * city.population;
+    private static void growCity(City city, int food, int happiness, List<String> events) {
+        int surplus = food - FOOD_PER_CITIZEN * city.population;
+        if (surplus > 0 && happiness < 0) surplus /= 4; // unhappy cities grow far more slowly
+        city.foodStored += surplus;
         if (city.foodStored < 0) {
             if (city.population > 1) {
                 city.population--;

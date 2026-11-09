@@ -26,6 +26,8 @@ public final class Civilization {
     public int gold;
     /** Culture earned over the whole game (for a future culture victory). */
     public int culture;
+    /** National happiness last strategic tick (see Resources.happiness). */
+    public int happiness;
     /** No cities and no armies left. */
     public boolean eliminated;
 

@@ -17,7 +17,7 @@ class RulesetTest {
         Ruleset r = loader.build();
         assertEquals(12, r.techs().size());
         assertEquals(8, r.buildings().size());
-        assertEquals(6, r.units().size());
+        assertEquals(7, r.units().size());
         assertEquals(List.of(), RulesetValidator.validate(r));
         assertEquals(List.of("civcore:granary"), r.techs().get("civcore:pottery").unlocks().buildings());
     }

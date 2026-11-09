@@ -47,11 +47,11 @@
 | F2.2 | Building ↔ yield mapping | P1 | F2.1 | — | Config mapping MineColonies building types/levels → city modifiers | M | M | Raising a Farmer hut level changes city food after reconcile; capped |
 | F2.3 | AI city blueprint projection | P1 | F1.16 | Structurize | Era style pack; catch-up paste on load | M | M | Walking to an AI city shows buildings matching its strategic buildings |
 | F2.4 | OPAC territory enforcement | P1 | S0.5, F1.8 | OPAC API | Adapter | M | M | Tiles claimed in OPAC within 1 s of ownership change; Xaero displays them |
-| F2.5 | Strategic resources | P1 | F1.6 | — | Deposits, improvements, stockpiles, physical markers | M | M | Iron deposit inside borders + mine → +iron; units requiring iron blocked without it |
+| F2.5 ✅ (no improvements yet) | Strategic resources | P1 | F1.6 | — | Deposits, improvements, stockpiles, physical markers | M | M | Iron deposit inside borders + mine → +iron; units requiring iron blocked without it |
 | F2.6 | Treasury block + currency | P1 | F1.9 | Lightman's Currency (optional) | Item→gold conversion with diminishing returns | M | M | Repeated deposits yield decreasing gold; blacklisted items refused |
 | F2.7 | Roads and connections | P2 | F1.11 | — | Road orders, path placement, connection bonus, fast travel | M | L | Connected cities gain gold; travel command teleports between connected cities |
 | F2.8 | Trade routes | P2 | F2.7 | — | Caravans, route yields, plunder | M | M | Route generates gold to both civs; enemy army on route stops it |
-| F2.9 | Happiness/stability | P1 | F1.9 | — | Happiness model, luxury resources | L | M | Expanding beyond limit causes growth penalty |
+| F2.9 ✅ | Happiness/stability | P1 | F1.9 | — | Happiness model, luxury resources | L | M | Expanding beyond limit causes growth penalty |
 
 ## Phase 3 — Military and conquest
 

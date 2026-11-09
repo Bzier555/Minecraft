@@ -34,6 +34,7 @@ public final class GameStateCodec {
         }
         state.map.ensureTerrainArrays();
         markMissingOriginalCapitals(state);
+        if (state.map.analysed && state.map.resource == null) dev.civcore.sim.worldplan.ResourcePlacer.place(state);
         return state;
     }
 
