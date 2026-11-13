@@ -1,8 +1,10 @@
-"""Minimal Source RCON client for the spike server. Usage: python rcon.py "cmd1" "cmd2" ..."""
-import socket, struct, sys, time
+"""Minimal Source RCON client. Usage: [RCON_PASSWORD=...] python rcon.py "cmd1" "cmd2" ...
+(defaults to the spike server password; C:\CivServer keeps its password in rcon-password.txt)"""
+import os, socket, struct, sys, time
 
 class Rcon:
-    def __init__(self, host="127.0.0.1", port=25575, password="civspike"):
+    def __init__(self, host="127.0.0.1", port=25575, password=None):
+        password = password or os.environ.get("RCON_PASSWORD", "civspike")
         self.s = socket.create_connection((host, port), timeout=60)
         self.rid = 0
         self._send(3, password)

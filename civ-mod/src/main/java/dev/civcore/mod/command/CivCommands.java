@@ -158,6 +158,22 @@ public final class CivCommands {
                             ObserveHook.add(IntegerArgumentType.getInteger(ctx, "x"), IntegerArgumentType.getInteger(ctx, "z"));
                             return msg(ctx, "Armies near that point now materialise as if a player were there.");
                         }))))
+                .then(Commands.literal("addmember")
+                    .then(Commands.argument("civ", IntegerArgumentType.integer(1))
+                        .then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player()).executes(ctx -> {
+                            ServerPlayer target = net.minecraft.commands.arguments.EntityArgument.getPlayer(ctx, "player");
+                            int civId = IntegerArgumentType.getInteger(ctx, "civ");
+                            return game(ctx).map(g -> g.state().map(s -> {
+                                var civ = s.civs.get(civId);
+                                if (civ == null) return reply(ctx, CommandResult.fail("No civilization #" + civId + " (see /civ civs)."));
+                                if (s.civOfMember(target.getStringUUID()).isPresent()) return reply(ctx, CommandResult.fail(target.getGameProfile().getName() + " already belongs to a civilization."));
+                                civ.members.add(target.getStringUUID());
+                                g.save();
+                                g.syncWorld();
+                                ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(Component.literal("[Civ] " + target.getGameProfile().getName() + " joined " + civ.name + "."), false);
+                                return 1;
+                            }).orElse(0)).orElse(0);
+                        }))))
                 .then(Commands.literal("victory")
                     .then(Commands.argument("type", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(new String[]{"domination", "science", "culture", "score"}, b))
@@ -254,7 +270,18 @@ public final class CivCommands {
         ServerPlayer p = ctx.getSource().getPlayerOrException();
         BlockPos pos = p.blockPosition();
         String city = StringArgumentType.getString(ctx, "city");
-        return game(ctx).map(g -> reply(ctx, g.submit(new Command.FoundCity(p.getStringUUID(), civName, city, pos.getX(), pos.getY(), pos.getZ())))).orElse(0);
+        return game(ctx).map(g -> {
+            // Only for a player's first city (e.g. a lost charter); later cities need Settlers or a charter.
+            if (g.state().flatMap(s -> s.civOfMember(p.getStringUUID())).isPresent() && !ctx.getSource().hasPermission(2)) {
+                return reply(ctx, CommandResult.fail("You already have a civilization. Train Settlers to found more cities."));
+            }
+            CommandResult r = g.submit(new Command.FoundCity(p.getStringUUID(), civName, city, pos.getX(), pos.getY(), pos.getZ()));
+            if (r.ok()) {
+                p.serverLevel().setBlockAndUpdate(pos, dev.civcore.mod.registry.ModContent.CITY_CENTER.get().defaultBlockState());
+                g.save();
+            }
+            return reply(ctx, r);
+        }).orElse(0);
     }
 
     private static int research(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
